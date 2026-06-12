@@ -1,8 +1,4 @@
-// Tema — inicializar ANTES del render para evitar flash
-(function() {
-  const saved = localStorage.getItem('megaSoatTheme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-})();
+
 
 document.addEventListener('DOMContentLoaded', () => {
   const AUTH_REDIRECT = '/login';
@@ -151,29 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // ── THEME TOGGLE ──
-    const navRight = document.querySelector('.nav-right');
-    if (navRight) {
-      function getTheme() { return document.documentElement.getAttribute('data-theme') || 'dark'; }
-      function renderThemeBtn(btn) {
-        const isDark = getTheme() === 'dark';
-        btn.innerHTML = isDark
-          ? '<span class="theme-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line></svg></span><span class="theme-label">Claro</span>'
-          : '<span class="theme-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"></path></svg></span><span class="theme-label">Oscuro</span>';
-        btn.setAttribute('title', isDark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
-      }
-      const themeBtn = document.createElement('button');
-      themeBtn.className = 'theme-toggle';
-      renderThemeBtn(themeBtn);
-      themeBtn.addEventListener('click', () => {
-        const next = getTheme() === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('megaSoatTheme', next);
-        renderThemeBtn(themeBtn);
-        document.querySelectorAll('.theme-toggle-drawer').forEach(b => renderDrawerThemeBtn(b));
-      });
-      navRight.insertBefore(themeBtn, navRight.firstChild);
-    }
+
 
     // ── BÚSQUEDA GLOBAL (DESACTIVADA) ──
     // Desactivada porque la funcionalidad de búsqueda fue retirada del sistema.
@@ -363,28 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       linksContainer.appendChild(a);
     });
 
-    // ── Botón de tema en drawer ──
-    function renderDrawerThemeBtn(btn) {
-      const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
-      btn.textContent = isDark ? 'Cambiar a Claro' : 'Cambiar a Oscuro';
-    }
-    const drawerThemeBtn = document.createElement('button');
-    drawerThemeBtn.className = 'btn-secondary mobile-drawer-logout theme-toggle-drawer';
-    drawerThemeBtn.style.cssText = 'margin-top:6px;border-color:var(--chip-border);background:var(--chip-bg);color:var(--text)';
-    renderDrawerThemeBtn(drawerThemeBtn);
-    drawerThemeBtn.addEventListener('click', () => {
-      const next = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('megaSoatTheme', next);
-      renderDrawerThemeBtn(drawerThemeBtn);
-      document.querySelectorAll('.theme-toggle').forEach(b => {
-        const isDark = next === 'dark';
-        b.innerHTML = isDark
-          ? '<span class="theme-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line><line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line></svg></span><span class="theme-label">Claro</span>'
-          : '<span class="theme-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"></path></svg></span><span class="theme-label">Oscuro</span>';
-      });
-    });
-    linksContainer.appendChild(drawerThemeBtn);
+
 
     // Acción de sesión justo debajo de los links
     if (token) {
