@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('megaSoatTheme')||'dark')</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Observatorio de Riesgos — MegaSOAT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        #map { height: 500px; width: 100%; border-radius: 0 0 var(--radius) var(--radius); }
+
+        /* Popup glassmorphism */
+        .leaflet-popup-content-wrapper {
+            background: rgba(12, 18, 40, 0.94);
+            backdrop-filter: blur(18px);
+            color: #e6eef1;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            transition: background .28s, color .28s, border-color .28s;
+        }
+        .leaflet-popup-tip { background: rgba(12,18,40,0.94); transition: background .28s; }
+        .leaflet-popup-close-button { color: #8892a4 !important; font-size: 18px !important; top: 10px !important; right: 10px !important; }
+        .leaflet-popup-close-button:hover { color: var(--text) !important; }
+        .leaflet-popup-content { margin: 16px 18px; }
+
+        /* Controles del mapa */
+        .leaflet-control-zoom a {
+            background: rgba(12,18,40,0.9) !important;
+            color: #e2e8f0 !important;
+            border-color: rgba(255,255,255,0.1) !important;
+            backdrop-filter: blur(8px);
+            transition: background .25s, color .25s !important;
+        }
+        .leaflet-control-zoom a:hover { background: rgba(6,182,212,0.15) !important; color: #06b6d4 !important; }
+        .leaflet-control-attribution { background: rgba(4,8,18,0.75) !important; color: #555 !important; font-size: .7rem; }
+
+        /* Leyenda flotante */
+        .map-legend {
+            background: rgba(12,18,40,0.90);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-family: 'Inter', sans-serif;
+            font-size: .78rem;
+            transition: background .28s, border-color .28s;
+        }
+        .map-legend-title {
+            font-weight: 700;
+            color: #e8edf5;
+            margin-bottom: 8px;
+            font-size: .8rem;
+            letter-spacing: .03em;
+            transition: color .28s;
+        }
+        .map-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            color: #c8d3e0;
+            transition: color .28s;
+        }
+        .map-legend-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 6px currentColor;
+        }
+        .map-legend-divider {
+            margin-top: 8px; padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* ── TEMA CLARO — Mapa ── */
+        [data-theme="light"] .leaflet-popup-content-wrapper {
+            background: rgba(255,255,255,0.97);
+            color: #1a202c;
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+        }
+        [data-theme="light"] .leaflet-popup-tip { background: rgba(255,255,255,0.97); }
+        [data-theme="light"] .leaflet-popup-close-button { color: #64748b !important; }
+        [data-theme="light"] .leaflet-control-zoom a {
+            background: rgba(255,255,255,0.97) !important;
+            color: #334155 !important;
+            border-color: rgba(0,0,0,0.1) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+        }
+        [data-theme="light"] .leaflet-control-zoom a:hover {
+            background: rgba(6,182,212,0.1) !important;
+            color: #0891b2 !important;
+        }
+        [data-theme="light"] .leaflet-control-attribution {
+            background: rgba(255,255,255,0.88) !important;
+            color: #888 !important;
+        }
+        [data-theme="light"] .map-legend {
+            background: rgba(255,255,255,0.96);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+        }
+        [data-theme="light"] .map-legend-title { color: #1a202c; }
+        [data-theme="light"] .map-legend-row { color: #334155; }
+        [data-theme="light"] .map-legend-divider { border-top-color: rgba(0,0,0,0.08); }
+        [data-theme="light"] .map-popup-label { color: #64748b; }
+
+        /* Map card header gradient */
+        .map-card-header {
+            padding: 18px 22px;
+            background: linear-gradient(90deg, rgba(6,182,212,0.06) 0%, rgba(99,102,241,0.04) 100%);
+            border-bottom: 1px solid var(--card-border);
+            border-radius: var(--radius) var(--radius) 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: border-color .28s;
+        }
+        .map-live-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #06b6d4;
+            box-shadow: 0 0 8px #06b6d4;
+            animation: blink 2s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    </style>
+</head>
+<body data-requires-auth="true">
+    <header class="topbar">
+        <div class="brand"><div class="brand-icon">MS</div>Mega<span>SOAT</span></div>
+        <div class="nav-sep"></div>
+        <nav class="nav-links">
+            <a href="/">Inicio</a>
+            <a href="/portal.html">Verificar SOAT</a>
+            <a href="/ranking.html">Ranking</a>
+            <a href="/observatorio.html">Observatorio</a>
+            <a href="/dashboard.html" class="nav-auth" style="display:none">Panel de control</a>
+            <a href="/admin.html" class="nav-auth" style="display:none">Administración</a>
+        </nav>
+        <div class="nav-right">
+            <a href="/login" class="btn-nav-login nav-guest">Ingresar</a>
+            <div class="user-chip nav-auth" style="display:none">
+                <strong id="userLabel">—</strong>
+                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Header section -->
+        <div class="panel" style="margin-bottom:20px;padding:28px 32px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+                <div>
+                    <h1 style="font-size:1.8rem" class="text-gradient">Observatorio de Riesgos</h1>
+                    <p class="lead" style="margin-bottom:14px">Monitoreo geoespacial de morosidad por punto de venta y ciudad.</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                        <span class="badge low" style="gap:6px;padding:5px 12px">
+                            <span style="width:7px;height:7px;border-radius:50%;background:#06b6d4;display:inline-block;box-shadow:0 0 6px #06b6d4"></span>
+                            Bajo riesgo (&lt;10%)
+                        </span>
+                        <span class="badge medium" style="gap:6px;padding:5px 12px">
+                            <span style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 6px #f59e0b"></span>
+                            Riesgo medio (10–20%)
+                        </span>
+                        <span class="badge high" style="gap:6px;padding:5px 12px">
+                            <span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 6px #ef4444"></span>
+                            Alto riesgo (&gt;20%)
+                        </span>
+                    </div>
+                </div>
+                <button class="btn-secondary" onclick="loadMap()">↻ Actualizar mapa</button>
+            </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats" id="mapStats" style="margin-bottom:20px"></div>
+
+        <!-- Map -->
+        <div class="map-card" style="margin-bottom:20px;border-radius:var(--radius);overflow:hidden">
+            <div class="map-card-header">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div class="map-live-dot"></div>
+                    <h2 style="font-size:1rem;font-weight:600;margin:0">Mapa interactivo de morosidad</h2>
+                </div>
+                <span id="mapPointCount" style="font-size:.82rem;color:var(--muted)"></span>
+            </div>
+            <div id="map"></div>
+        </div>
+
+        <!-- Alerts panel -->
+        <div class="panel" style="padding:24px">
+            <div class="section-header">
+                <h2>Alertas de riesgo activas</h2>
+                <span id="alertCount" class="badge high" style="display:none"></span>
+            </div>
+            <div id="alerts"></div>
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/animations.js" defer></script>
+    <script>
+        const token = localStorage.getItem('megaSoatToken');
+        let leafletMap = null;
+        let markers = [];
+
+        // Tile URLs por tema
+        const TILE_URLS = {
+            dark:  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+        };
+        let currentTile = null;
+
+        function getMapTheme() {
+            return document.documentElement.getAttribute('data-theme') || 'dark';
+        }
+
+        function updateTileLayer() {
+            if (!leafletMap) return;
+            if (currentTile) leafletMap.removeLayer(currentTile);
+            currentTile = L.tileLayer(TILE_URLS[getMapTheme()], {
+                attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(leafletMap);
+        }
+
+        function initMap() {
+            leafletMap = L.map('map', {
+                center: [-9.5, -75.0],
+                zoom: 5,
+                zoomControl: true,
+                attributionControl: true
+            });
+
+            updateTileLayer();
+
+            // Leyenda flotante
+            const legend = L.control({ position: 'bottomleft' });
+            legend.onAdd = () => {
+                const div = L.DomUtil.create('div', 'map-legend');
+                div.innerHTML = `
+                    <div class="map-legend-title">Nivel de riesgo</div>
+                    <div class="map-legend-row">
+                        <div class="map-legend-dot" style="background:#06b6d4;color:#06b6d4"></div>
+                        <span>Bajo (&lt; 10%)</span>
+                    </div>
+                    <div class="map-legend-row">
+                        <div class="map-legend-dot" style="background:#f59e0b;color:#f59e0b"></div>
+                        <span>Medio (10–20%)</span>
+                    </div>
+                    <div class="map-legend-row">
+                        <div class="map-legend-dot" style="background:#ef4444;color:#ef4444"></div>
+                        <span>Alto (&gt; 20%)</span>
+                    </div>
+                    <div class="map-legend-row map-legend-divider">
+                        <div class="map-legend-dot" style="background:rgba(128,128,128,0.4);color:#888;width:20px;height:20px"></div>
+                        <span>Tamaño = volumen</span>
+                    </div>`;
+                return div;
+            };
+            legend.addTo(leafletMap);
+
+            // Reemplazar tile layer cuando cambie el tema
+            new MutationObserver(() => updateTileLayer())
+                .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        }
+
+        function riskColor(risk) {
+            if (risk === 'alto')  return '#ef4444';
+            if (risk === 'medio') return '#f59e0b';
+            return '#06b6d4';
+        }
+
+        function clearMarkers() {
+            markers.forEach(m => m.remove());
+            markers = [];
+        }
+
+        function createMarkerIcon(point) {
+            const color = riskColor(point.risk);
+            const size  = Math.round(10 + Math.min(point.sales * 0.6, 22));
+            const isPulsing = point.risk !== 'bajo';
+
+            const html = `
+                <div style="position:relative;width:${size}px;height:${size}px">
+                    ${isPulsing ? `
+                        <div style="position:absolute;inset:-3px;border-radius:50%;border:2px solid ${color};animation:pulseRing 2s ease-out infinite"></div>
+                        <div style="position:absolute;inset:-3px;border-radius:50%;border:2px solid ${color};animation:pulseRing 2s ease-out infinite .7s"></div>
+                    ` : ''}
+                    <div style="
+                        position:absolute;inset:0;border-radius:50%;
+                        background:${color};
+                        opacity:0.9;
+                        box-shadow:0 0 ${size/2}px ${color}cc, 0 0 ${size}px ${color}55;
+                        border:2px solid rgba(255,255,255,0.25);
+                    "></div>
+                    <div style="
+                        position:absolute;inset:25%;border-radius:50%;
+                        background:rgba(255,255,255,0.5);
+                    "></div>
+                </div>`;
+
+            return L.divIcon({
+                className: '',
+                html,
+                iconSize:   [size, size],
+                iconAnchor: [size / 2, size / 2],
+                popupAnchor:[0, -(size / 2 + 6)]
+            });
+        }
+
+        function buildPopup(point) {
+            const color = riskColor(point.risk);
+            const barPct = Math.min(point.delinquency * 4, 100).toFixed(0);
+            return `
+            <div class="map-popup">
+                <div class="map-popup-title">${point.name}</div>
+                <div class="map-popup-row">
+                    <span class="map-popup-label">📍 Ciudad</span>
+                    <span class="map-popup-value">${point.city}</span>
+                </div>
+                <div class="map-popup-row">
+                    <span class="map-popup-label">📋 SOAT vendidos</span>
+                    <span class="map-popup-value" style="color:#06b6d4">${point.sales}</span>
+                </div>
+                <div class="map-popup-row">
+                    <span class="map-popup-label">⚠️ Morosidad</span>
+                    <span class="map-popup-value" style="color:${color}">${point.delinquency.toFixed(1)}%</span>
+                </div>
+                <div class="map-popup-bar-wrap">
+                    <div class="map-popup-bar" style="width:${barPct}%;background:${color}"></div>
+                </div>
+                <div class="map-popup-badge" style="background:${color}18;border:1px solid ${color}40;color:${color}">
+                    ${point.risk.toUpperCase()}
+                </div>
+            </div>`;
+        }
+
+        async function loadMap() {
+            const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+            try {
+                const res  = await fetch('/api/dashboard/map', { headers });
+                const data = await res.json();
+
+                clearMarkers();
+
+                let alto = 0, medio = 0, bajo = 0;
+
+                data.forEach(point => {
+                    if (point.lat == null || point.lng == null) return;
+
+                    const marker = L.marker([point.lat, point.lng], {
+                        icon: createMarkerIcon(point)
+                    }).addTo(leafletMap);
+
+                    marker.bindPopup(buildPopup(point), {
+                        maxWidth: 240,
+                        className: ''
+                    });
+
+                    markers.push(marker);
+                    if (point.risk === 'alto')       alto++;
+                    else if (point.risk === 'medio') medio++;
+                    else                             bajo++;
+                });
+
+                document.getElementById('mapPointCount').textContent = `${data.length} puntos de venta`;
+
+                // Stats
+                document.getElementById('mapStats').innerHTML = `
+                    <div class="card accent-border">
+                        <h2>Total PV mapeados</h2>
+                        <strong>${data.length}</strong>
+                        <small>puntos activos</small>
+                    </div>
+                    <div class="card" style="border-color:rgba(6,182,212,0.2)">
+                        <h2>Bajo riesgo</h2>
+                        <strong style="color:#06b6d4">${bajo}</strong>
+                        <small>morosidad &lt; 10%</small>
+                    </div>
+                    <div class="card warn-border">
+                        <h2>Riesgo medio</h2>
+                        <strong style="color:#f59e0b">${medio}</strong>
+                        <small>morosidad 10–20%</small>
+                    </div>
+                    <div class="card danger-border">
+                        <h2>Alto riesgo</h2>
+                        <strong style="color:#ef4444">${alto}</strong>
+                        <small>morosidad &gt; 20%</small>
+                    </div>
+                `;
+
+                // Alerts
+                const alertsEl   = document.getElementById('alerts');
+                const alertCount = document.getElementById('alertCount');
+                const atRisk     = data.filter(p => p.risk !== 'bajo');
+
+                if (atRisk.length === 0) {
+                    alertsEl.innerHTML = '<div class="alert-empty">Sin puntos de venta en riesgo medio o alto</div>';
+                    alertCount.style.display = 'none';
+                } else {
+                    alertCount.textContent    = atRisk.length + ' alertas';
+                    alertCount.style.display  = 'inline-flex';
+                    alertsEl.innerHTML = atRisk
+                        .sort((a, b) => b.delinquency - a.delinquency)
+                        .map(p => {
+                            const c = riskColor(p.risk);
+                            return `
+                            <div class="alert ${p.risk === 'medio' ? 'medium' : ''}" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+                                <div>
+                                    <strong>${p.name}</strong>
+                                    <p style="margin:3px 0 0">${p.city} · SOAT vendidos: ${p.sales}</p>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+                                    <div style="text-align:right">
+                                        <div style="font-size:1.3rem;font-weight:800;color:${c}">${p.delinquency.toFixed(1)}%</div>
+                                        <div style="font-size:.72rem;color:var(--muted)">morosidad</div>
+                                    </div>
+                                    <span class="badge ${p.risk === 'medio' ? 'medium' : 'high'}">${p.risk.toUpperCase()}</span>
+                                </div>
+                            </div>`;
+                        }).join('');
+                }
+
+            } catch(e) {
+                console.error('Error cargando mapa:', e);
+                document.getElementById('alerts').innerHTML =
+                    '<div class="alert"><strong>Error de conexión</strong><p>No se pudo cargar la información del mapa.</p></div>';
+            }
+        }
+
+        initMap();
+        loadMap();
+    </script>
+</body>
+</html>

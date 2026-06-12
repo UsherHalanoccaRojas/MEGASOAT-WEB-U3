@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('megaSoatTheme')||'dark')</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Perfil — MegaSOAT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/site.css">
+  <style>
+    /* ── Perfil layout ── */
+    .perfil-wrap {
+      max-width: 780px;
+      margin: 48px auto;
+      padding: 0 20px 80px;
+    }
+    .perfil-header {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 36px;
+    }
+    /* Avatar grande */
+    .avatar-ring {
+      position: relative;
+      flex-shrink: 0;
+      width: 96px; height: 96px;
+      cursor: pointer;
+    }
+    .avatar-ring:hover .avatar-overlay { opacity: 1; }
+    .avatar-overlay {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.52);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px;
+      opacity: 0;
+      transition: opacity .2s ease;
+      color: #fff; font-size: .72rem; font-weight: 600;
+      pointer-events: none;
+    }
+    .avatar-overlay span { font-size: 1.3rem; line-height: 1; }
+    .avatar-img {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      background: var(--chip-bg);
+      display: block;
+    }
+    .avatar-initials {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(var(--accent-rgb),0.25), rgba(var(--accent-rgb),0.1));
+      border: 3px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700; color: var(--accent);
+      letter-spacing: 1px;
+    }
+    #avatarInput { display: none; }
+
+    .perfil-title h1 {
+      font-size: 1.6rem; font-weight: 700; color: var(--text);
+      margin-bottom: 4px;
+    }
+    .perfil-title .role-chip {
+      display: inline-block;
+      font-size: .75rem; font-weight: 600;
+      padding: 2px 10px; border-radius: 20px;
+      background: rgba(var(--accent-rgb),.14);
+      color: var(--accent);
+      border: 1px solid rgba(var(--accent-rgb),.28);
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+
+    /* Secciones */
+    .perfil-section {
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+    .perfil-section h2 {
+      font-size: 1rem; font-weight: 600; color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+
+    .form-field { display: flex; flex-direction: column; gap: 6px; }
+    .form-field label { font-size: .82rem; font-weight: 500; color: var(--muted); }
+    .form-field input {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: .92rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .form-field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.12);
+    }
+    .form-field input:read-only {
+      opacity: .55; cursor: not-allowed;
+    }
+
+    .field-hint { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    .btn-save {
+      margin-top: 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 10px 28px;
+      font-size: .92rem; font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s ease, transform .15s ease;
+    }
+    .btn-save:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-save:active { transform: translateY(0); opacity: 1; }
+
+    /* Alerta inline */
+    .field-alert {
+      font-size: .8rem; font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+    }
+    .field-alert.success { display: block; background: rgba(var(--accent-rgb),.12); color: var(--accent); border: 1px solid rgba(var(--accent-rgb),.25); }
+    .field-alert.error   { display: block; background: rgba(248,113,113,.1);  color: var(--danger);  border: 1px solid rgba(248,113,113,.25); }
+
+    /* Strength bar */
+    .strength-bar-wrap { height: 4px; border-radius: 2px; background: var(--input-border); margin-top: 6px; overflow: hidden; }
+    .strength-bar { height: 100%; width: 0; border-radius: 2px; transition: width .3s ease, background .3s ease; }
+
+    /* Light mode overrides */
+    [data-theme="light"] .perfil-section {
+      background: #ffffff;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    }
+  </style>
+</head>
+<body data-requires-auth="true">
+  <header class="topbar">
+    <div class="brand"><div class="brand-icon">MS</div>Mega<span>SOAT</span></div>
+    <div class="nav-sep"></div>
+    <nav class="nav-links">
+      <a href="/">Inicio</a>
+      <a href="/portal.html">Verificar SOAT</a>
+      <a href="/ranking.html">Ranking</a>
+      <a href="/observatorio.html">Observatorio</a>
+      <a href="/dashboard.html" class="nav-auth" style="display:none">Panel de control</a>
+      <a href="/admin.html" class="nav-auth" style="display:none">Administración</a>
+    </nav>
+    <div class="nav-right">
+      <a href="/login" class="btn-nav-login nav-guest">Ingresar</a>
+      <div class="user-chip nav-auth" style="display:none">
+        <strong id="userLabel">—</strong>
+        <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="perfil-wrap">
+    <!-- Cabecera del perfil -->
+    <div class="perfil-header">
+      <div class="avatar-ring" onclick="document.getElementById('avatarInput').click()" title="Haz clic para cambiar tu foto">
+        <div class="avatar-initials" id="avatarInitials">??</div>
+        <img class="avatar-img" id="avatarImg" src="" alt="Avatar" style="display:none">
+        <div class="avatar-overlay"><span>📷</span>Cambiar</div>
+        <input type="file" id="avatarInput" accept="image/*">
+      </div>
+      <div class="perfil-title">
+        <h1 id="profileName">Cargando…</h1>
+        <span class="role-chip" id="profileRole">—</span>
+      </div>
+    </div>
+
+    <!-- Información general -->
+    <div class="perfil-section">
+      <h2>Información general</h2>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="fieldFullName">Nombre completo</label>
+          <input type="text" id="fieldFullName" placeholder="Tu nombre">
+        </div>
+        <div class="form-field">
+          <label for="fieldEmail">Correo electrónico</label>
+          <input type="text" id="fieldEmail" readonly>
+          <span class="field-hint">El correo no se puede cambiar</span>
+        </div>
+        <div class="form-field">
+          <label for="fieldUsername">Usuario</label>
+          <input type="text" id="fieldUsername" readonly>
+        </div>
+        <div class="form-field">
+          <label for="fieldRol">Rol</label>
+          <input type="text" id="fieldRol" readonly>
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveProfile()">Guardar cambios</button>
+      <div class="field-alert" id="alertProfile"></div>
+    </div>
+
+    <!-- Cambio de contraseña -->
+    <div class="perfil-section">
+      <h2>Cambiar contraseña</h2>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="fieldCurrentPwd">Contraseña actual</label>
+          <input type="password" id="fieldCurrentPwd" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-field">
+          <label for="fieldNewPwd">Nueva contraseña</label>
+          <input type="password" id="fieldNewPwd" placeholder="Mín. 6 caracteres" autocomplete="new-password">
+          <div class="strength-bar-wrap"><div class="strength-bar" id="strengthBar"></div></div>
+        </div>
+        <div class="form-field">
+          <label for="fieldConfirmPwd">Confirmar nueva contraseña</label>
+          <input type="password" id="fieldConfirmPwd" placeholder="Repite la contraseña" autocomplete="new-password">
+        </div>
+      </div>
+      <button class="btn-save" onclick="savePassword()">Actualizar contraseña</button>
+      <div class="field-alert" id="alertPassword"></div>
+    </div>
+  </main>
+
+  <script src="/js/animations.js"></script>
+  <script>
+    const API = '/api/users/me';
+
+    async function authFetch(url, opts = {}) {
+      const token = localStorage.getItem('megaSoatToken');
+      return fetch(url, {
+        ...opts,
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, ...(opts.headers || {}) }
+      });
+    }
+
+    // ── Cargar perfil ──
+    async function loadProfile() {
+      const res = await authFetch(API);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      document.getElementById('profileName').textContent  = data.fullName || data.username;
+      document.getElementById('profileRole').textContent  = (data.rol || '').replace('ROLE_','');
+      document.getElementById('fieldFullName').value      = data.fullName || '';
+      document.getElementById('fieldEmail').value         = data.email    || '';
+      document.getElementById('fieldUsername').value      = data.username  || '';
+      document.getElementById('fieldRol').value           = (data.rol || '').replace('ROLE_','');
+
+      const initials = (data.fullName || data.username || '?').slice(0,2).toUpperCase();
+      document.getElementById('avatarInitials').textContent = initials;
+
+      if (data.avatarUrl) {
+        const img = document.getElementById('avatarImg');
+        img.src = data.avatarUrl;
+        img.style.display = 'block';
+        document.getElementById('avatarInitials').style.display = 'none';
+      }
+    }
+
+    // ── Guardar nombre ──
+    async function saveProfile() {
+      const fullName = document.getElementById('fieldFullName').value.trim();
+      if (!fullName) return showAlert('alertProfile', 'El nombre no puede estar vacío', 'error');
+      const res = await authFetch(API, { method: 'PUT', body: JSON.stringify({ fullName }) });
+      if (res.ok) {
+        document.getElementById('profileName').textContent = fullName;
+        showAlert('alertProfile', 'Nombre actualizado correctamente', 'success');
+      } else {
+        showAlert('alertProfile', 'Error al guardar el nombre', 'error');
+      }
+    }
+
+    // ── Cambiar contraseña ──
+    async function savePassword() {
+      const currentPassword = document.getElementById('fieldCurrentPwd').value;
+      const newPassword     = document.getElementById('fieldNewPwd').value;
+      const confirmPassword = document.getElementById('fieldConfirmPwd').value;
+
+      if (newPassword.length < 6)
+        return showAlert('alertPassword', 'La nueva contraseña debe tener al menos 6 caracteres', 'error');
+      if (newPassword !== confirmPassword)
+        return showAlert('alertPassword', 'Las contraseñas no coinciden', 'error');
+
+      const res = await authFetch(API + '/password', {
+        method: 'PUT',
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showAlert('alertPassword', data.message || 'Contraseña actualizada', 'success');
+        document.getElementById('fieldCurrentPwd').value = '';
+        document.getElementById('fieldNewPwd').value     = '';
+        document.getElementById('fieldConfirmPwd').value = '';
+        document.getElementById('strengthBar').style.width = '0';
+      } else {
+        showAlert('alertPassword', data.error || 'Error al cambiar contraseña', 'error');
+      }
+    }
+
+    // ── Avatar upload — redimensiona a 200x200 antes de guardar ──
+    document.getElementById('avatarInput').addEventListener('change', async function() {
+      const file = this.files[0];
+      if (!file) return;
+
+      showAlert('alertProfile', 'Procesando imagen…', 'success');
+
+      const avatarUrl = await resizeImage(file, 200);
+
+      const res = await authFetch(API + '/avatar', {
+        method: 'PUT',
+        body: JSON.stringify({ avatarUrl })
+      });
+      if (res.ok) {
+        const img = document.getElementById('avatarImg');
+        img.src = avatarUrl;
+        img.style.display = 'block';
+        document.getElementById('avatarInitials').style.display = 'none';
+        showAlert('alertProfile', 'Foto actualizada correctamente', 'success');
+      } else {
+        showAlert('alertProfile', 'Error al guardar la foto', 'error');
+      }
+    });
+
+    // Redimensiona y recorta la imagen en un cuadrado usando Canvas
+    function resizeImage(file, size) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width  = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Recorte cuadrado centrado (crop al centro)
+            const min = Math.min(img.width, img.height);
+            const sx  = (img.width  - min) / 2;
+            const sy  = (img.height - min) / 2;
+            ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+
+            resolve(canvas.toDataURL('image/jpeg', 0.88));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ── Barra de fortaleza de contraseña ──
+    document.getElementById('fieldNewPwd').addEventListener('input', function() {
+      const v = this.value;
+      const bar = document.getElementById('strengthBar');
+      let score = 0;
+      if (v.length >= 6) score++;
+      if (v.length >= 10) score++;
+      if (/[A-Z]/.test(v) && /[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const colors = ['#f87171','#fbbf24','#34d399','#06b6d4'];
+      const widths = ['25%','50%','75%','100%'];
+      bar.style.width  = score ? widths[score-1] : '0';
+      bar.style.background = score ? colors[score-1] : 'transparent';
+    });
+
+    function showAlert(id, msg, type) {
+      const el = document.getElementById(id);
+      el.textContent = msg;
+      el.className = 'field-alert ' + type;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.className = 'field-alert'; }, 4000);
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
