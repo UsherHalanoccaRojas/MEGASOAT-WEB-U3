@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <!-- Tema claro por defecto -->
@@ -22,11 +23,13 @@
             border-bottom: 1px solid var(--topbar-border);
             transition: background .28s, border-color .28s;
         }
+
         .login-topbar .nav-right {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -36,7 +39,10 @@
             font-weight: 500;
             transition: color .2s;
         }
-        .back-link:hover { color: var(--text); }
+
+        .back-link:hover {
+            color: var(--text);
+        }
 
         /* Centrado vertical completo */
         .login-page {
@@ -44,6 +50,7 @@
             display: flex;
             flex-direction: column;
         }
+
         .login-center {
             flex: 1;
             display: flex;
@@ -61,8 +68,8 @@
             border-radius: 18px;
             padding: 40px 36px;
             box-shadow:
-                0 0 0 1px rgba(var(--accent-rgb),0.06),
-                0 8px 24px rgba(0,0,0,0.08);
+                0 0 0 1px rgba(var(--accent-rgb), 0.06),
+                0 8px 24px rgba(0, 0, 0, 0.08);
             transition: background .28s, border-color .28s;
             position: relative;
             overflow: hidden;
@@ -77,7 +84,11 @@
             font-weight: 800;
             color: var(--text);
         }
-        .login-logo span { color: var(--accent); }
+
+        .login-logo span {
+            color: var(--accent);
+        }
+
         .login-subtitle {
             text-align: center;
             color: var(--muted);
@@ -89,22 +100,24 @@
         .login-field {
             margin-bottom: 14px;
         }
+
         .login-field input#captchaAnswer {
-        width: 100%;
-        background: var(--input-bg);
-        border: 1px solid var(--input-border);
-        border-radius: 10px;
-        padding: 12px 16px;
-        color: var(--text);
-        font-size: .95rem;
-        font-family: inherit;
-        outline: none;
-        transition: border-color .2s, box-shadow .2s;
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-size: .95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
         }
-         .login-field input#captchaAnswer:focus {
-        border-color: rgba(var(--accent-rgb),0.5);
-        box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.08);
-         }
+
+        .login-field input#captchaAnswer:focus {
+            border-color: rgba(var(--accent-rgb), 0.5);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
+        }
 
         .login-field label {
             display: block;
@@ -115,6 +128,7 @@
             letter-spacing: .5px;
             margin-bottom: 7px;
         }
+
         .login-field input {
             width: 100%;
             background: var(--input-bg);
@@ -127,9 +141,10 @@
             outline: none;
             transition: border-color .2s, box-shadow .2s;
         }
+
         .login-field input:focus {
-            border-color: rgba(var(--accent-rgb),0.5);
-            box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.08);
+            border-color: rgba(var(--accent-rgb), 0.5);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.08);
         }
 
         /* Captcha */
@@ -139,12 +154,13 @@
             align-items: center;
             margin-bottom: 14px;
         }
+
         .captcha-display {
             flex: 1;
             padding: 11px 16px;
             border-radius: 10px;
-            border: 1px solid rgba(var(--accent-rgb),0.2);
-            background: rgba(var(--accent-rgb),0.05);
+            border: 1px solid rgba(var(--accent-rgb), 0.2);
+            background: rgba(var(--accent-rgb), 0.05);
             color: var(--accent);
             text-align: center;
             font-family: 'Courier New', monospace;
@@ -152,6 +168,7 @@
             font-weight: 700;
             letter-spacing: 4px;
         }
+
         .btn-refresh {
             background: var(--chip-bg);
             border: 1px solid var(--chip-border);
@@ -163,7 +180,11 @@
             transition: all .2s;
             white-space: nowrap;
         }
-        .btn-refresh:hover { background: var(--input-bg); color: var(--text); }
+
+        .btn-refresh:hover {
+            background: var(--input-bg);
+            color: var(--text);
+        }
 
         /* Botón login */
         .btn-login {
@@ -181,9 +202,12 @@
         /* Tema claro — ajustes de la card */
         [data-theme="light"] .login-card {
             background: #ffffff;
-            box-shadow: 0 4px 32px rgba(0,0,0,0.10), 0 0 0 1px rgba(var(--accent-rgb),0.08);
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.10), 0 0 0 1px rgba(var(--accent-rgb), 0.08);
         }
-        [data-theme="light"] .login-topbar .back-link { color: var(--muted); }
+
+        [data-theme="light"] .login-topbar .back-link {
+            color: var(--muted);
+        }
 
         /* Mensaje de estado */
         .login-message {
@@ -193,21 +217,31 @@
             min-height: 20px;
             transition: all .2s;
         }
-        .login-message.error   { color: var(--danger); }
-        .login-message.success { color: var(--accent); }
+
+        .login-message.error {
+            color: var(--danger);
+        }
+
+        .login-message.success {
+            color: var(--accent);
+        }
 
         /* Modal sesión activa */
         .session-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.65);
+            background: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(6px);
             z-index: 999;
             align-items: center;
             justify-content: center;
         }
-        .session-overlay.visible { display: flex; }
+
+        .session-overlay.visible {
+            display: flex;
+        }
+
         .session-modal {
             background: var(--bg-card);
             border: 1px solid var(--card-border);
@@ -216,29 +250,34 @@
             max-width: 400px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
         }
+
         .session-modal .modal-icon {
             font-size: 2.4rem;
             margin-bottom: 12px;
         }
+
         .session-modal h3 {
             margin: 0 0 8px;
             font-size: 1.1rem;
             font-weight: 700;
             color: var(--text);
         }
+
         .session-modal p {
             color: var(--muted);
             font-size: .88rem;
             margin: 0 0 24px;
             line-height: 1.5;
         }
+
         .session-modal .modal-actions {
             display: flex;
             gap: 10px;
             justify-content: center;
         }
+
         .btn-modal-cancel {
             flex: 1;
             padding: 11px;
@@ -250,7 +289,12 @@
             cursor: pointer;
             transition: all .2s;
         }
-        .btn-modal-cancel:hover { background: var(--input-bg); color: var(--text); }
+
+        .btn-modal-cancel:hover {
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
         .btn-modal-confirm {
             flex: 1;
             padding: 11px;
@@ -263,7 +307,10 @@
             cursor: pointer;
             transition: opacity .2s;
         }
-        .btn-modal-confirm:hover { opacity: .85; }
+
+        .btn-modal-confirm:hover {
+            opacity: .85;
+        }
 
         /* Divider + link */
         .login-footer {
@@ -274,14 +321,18 @@
             font-size: .83rem;
             color: var(--muted);
         }
-        .login-footer a { color: var(--accent); }
+
+        .login-footer a {
+            color: var(--accent);
+        }
     </style>
 </head>
+
 <body class="login-page">
 
     <!-- Topbar minimalista: logo + toggle tema + volver -->
     <header class="login-topbar">
-        <a href="/" class="brand" style="text-decoration:none"><div class="brand-icon">MS</div>Mega<span>SOAT</span></a>
+        <a href="/" class="brand" style="text-decoration:none">Mega<span>SOAT</span></a>
         <div class="nav-right">
             <a href="/" class="back-link">← Volver al inicio</a>
         </div>
@@ -293,7 +344,7 @@
             <div class="modal-icon">📱</div>
             <h3>Cuenta en uso</h3>
             <p>Esta cuenta ya tiene una sesión activa en otro dispositivo.<br>
-               ¿Deseas continuar aquí y cerrar la otra sesión?</p>
+                ¿Deseas continuar aquí y cerrar la otra sesión?</p>
             <div class="modal-actions">
                 <button class="btn-modal-cancel" id="modalCancel">Cancelar</button>
                 <button class="btn-modal-confirm" id="modalConfirm">Continuar aquí</button>
@@ -310,14 +361,12 @@
 
             <div class="login-field">
                 <label>Correo electrónico</label>
-                <input id="email" type="email" 
-                       autocomplete="email">
+                <input id="email" type="email" autocomplete="email">
             </div>
 
             <div class="login-field">
                 <label>Contraseña</label>
-                <input id="password" type="password" 
-                       autocomplete="current-password">
+                <input id="password" type="password" autocomplete="current-password">
             </div>
 
             <div class="login-field">
@@ -331,25 +380,19 @@
                 <input type="hidden" id="captchaId" name="captchaId" value="">
             </div>
 
-
-
             <button id="loginButton" class="primary-button btn-login">Iniciar sesión</button>
 
             <div id="message" class="login-message"></div>
-
-            <div class="login-footer">
-                ¿Necesitas verificar tu SOAT? <a href="/portal.html">Búscalo aquí</a>
-            </div>
         </div>
     </div>
 
     <script src="/js/animations.js" defer></script>
     <script>
-        const button    = document.getElementById('loginButton');
+        const button = document.getElementById('loginButton');
         const captchaCode = document.getElementById('captchaCode');
-        const refreshBtn  = document.getElementById('refreshCaptcha');
-        const messageEl   = document.getElementById('message');
-        const overlay     = document.getElementById('sessionOverlay');
+        const refreshBtn = document.getElementById('refreshCaptcha');
+        const messageEl = document.getElementById('message');
+        const overlay = document.getElementById('sessionOverlay');
         let captchaId = null;
         let pendingEmail = null;
         let pendingPassword = null;
@@ -362,7 +405,7 @@
                 captchaId = j.id;
                 captchaCode.textContent = j.question;
                 document.getElementById('captchaAnswer').value = '';
-            } catch(e) { captchaId = null; }
+            } catch (e) { captchaId = null; }
         }
 
         loadCaptcha();
@@ -378,11 +421,11 @@
         button.addEventListener('click', async () => {
             messageEl.textContent = '';
             messageEl.className = 'login-message';
-            const email    = document.getElementById('email').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const captchaAnswer = document.getElementById('captchaAnswer').value.trim();
             if (!email || !password) { showMsg('Completa todos los campos', 'error'); return; }
-            if (!captchaAnswer)      { showMsg('Ingresa el código de verificación', 'error'); return; }
+            if (!captchaAnswer) { showMsg('Ingresa el código de verificación', 'error'); return; }
 
             button.textContent = 'Verificando...';
             button.disabled = true;
@@ -396,7 +439,7 @@
 
                 if (res.status === 409) {
                     // Cuenta activa en otro dispositivo → mostrar modal
-                    pendingEmail    = email;
+                    pendingEmail = email;
                     pendingPassword = password;
                     overlay.classList.add('visible');
                     button.textContent = 'Iniciar sesión';
@@ -409,7 +452,7 @@
                     throw new Error('Error de autenticación');
                 }
                 saveSessionAndRedirect(await res.json());
-            } catch(err) {
+            } catch (err) {
                 showMsg(err.message || 'Error de autenticación', 'error');
                 button.textContent = 'Iniciar sesión';
                 button.disabled = false;
@@ -445,7 +488,7 @@
                     return;
                 }
                 saveSessionAndRedirect(await res.json());
-            } catch(e) {
+            } catch (e) {
                 showMsg('Error de red. Intenta de nuevo.', 'error');
                 button.textContent = 'Iniciar sesión';
                 button.disabled = false;
@@ -463,4 +506,5 @@
         }
     </script>
 </body>
+
 </html>
