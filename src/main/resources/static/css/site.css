@@ -3,49 +3,21 @@
    Tema: Aurora Fintech — Moderno, Premium, Atractivo
    ═══════════════════════════════════════════════════ */
 :root {
-  /* Colores base */
-  --bg-base:   #0b0b0b;
-  --bg-card:   rgba(255,255,255,0.03);
-  --card-border: rgba(255,255,255,0.06);
-  --muted:     #9aa3ad;
-  --text:      #ffffff;
-  --accent:    #06b6d4;
-  --accent-rgb: 6,182,212;
-  --danger:    #f87171;
-  --warning:   #fbbf24;
-  --info:      #60a5fa;
-  --radius:    12px;
-  --radius-sm: 8px;
-
-  /* Variables estructurales (tema oscuro por defecto) */
-  --topbar-bg:       rgba(4,7,16,0.92);
-  --topbar-border:   rgba(255,255,255,0.05);
-  --modal-bg:        #0e1428;
-  --modal-border:    rgba(255,255,255,0.09);
-  --drawer-bg:       #0c1228;
-  --input-bg:        rgba(255,255,255,0.05);
-  --input-border:    rgba(255,255,255,0.1);
-  --surface-1:       rgba(255,255,255,0.038);
-  --surface-hover:   rgba(255,255,255,0.025);
-  --table-border:    rgba(255,255,255,0.03);
-  --table-border-h:  rgba(255,255,255,0.06);
-  --text-dim:        #c8d3e0;
-  --nav-link-color:  rgba(155,178,198,0.72);
-  --chip-bg:         rgba(255,255,255,0.04);
-  --chip-border:     rgba(255,255,255,0.08);
-  --toast-bg:        #131a2e;
-  --select-opt-bg:   #141d2e;
-}
-
-/* ═══════════════════════════════════════
-   TEMA CLARO
-   ═══════════════════════════════════════ */
-[data-theme="light"] {
+  /* Colores base (Tema Claro por defecto) */
   --bg-base:       #f0f4f8;
   --bg-card:       rgba(255,255,255,0.85);
   --card-border:   rgba(0,0,0,0.08);
   --muted:         #64748b;
   --text:          #1a202c;
+  --accent:        #06b6d4;
+  --accent-rgb:    6,182,212;
+  --danger:        #f87171;
+  --warning:       #fbbf24;
+  --info:          #60a5fa;
+  --radius:        12px;
+  --radius-sm:     8px;
+
+  /* Variables estructurales */
   --topbar-bg:     rgba(255,255,255,0.95);
   --topbar-border: rgba(0,0,0,0.07);
   --modal-bg:      #ffffff;
