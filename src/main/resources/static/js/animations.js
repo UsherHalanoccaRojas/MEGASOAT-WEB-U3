@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return labels[pathname] || pathname;
   }
 
+  //
   function trackPageNavigation(pathname, origin) {
     const token = localStorage.getItem('megaSoatToken');
     if (!token) return;
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ══════════════════════════════════════
   (function initNav() {
     const token = localStorage.getItem('megaSoatToken');
-    const user  = localStorage.getItem('megaSoatUser');
+    const user = localStorage.getItem('megaSoatUser');
 
     if (document.body?.dataset.requiresAuth === 'true' && !token) {
       window.location.replace(AUTH_REDIRECT);
@@ -110,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!chip) { if (user) el.textContent = user; return; }
 
       const username = user ? user.split('@')[0] : '?';
-      const initials = username.slice(0,2).toUpperCase();
+      const initials = username.slice(0, 2).toUpperCase();
 
       // Detectar rol del token JWT (payload base64)
       let rolLabel = '';
@@ -118,10 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const tok = localStorage.getItem('megaSoatToken');
         if (tok) {
           const payload = JSON.parse(atob(tok.split('.')[1]));
-          const roles = (payload.roles || '').replace('ROLE_','').split(',');
+          const roles = (payload.roles || '').replace('ROLE_', '').split(',');
           rolLabel = roles[0] || '';
         }
-      } catch(e) {}
+      } catch (e) { }
 
       chip.innerHTML = `
         <a class="user-chip-avatar" id="chipAvatar" href="/perfil.html" title="Mi perfil">${initials}</a>
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (avatarEl) {
               avatarEl.innerHTML = `<img src="${data.avatarUrl}" alt="avatar" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">`;
             }
-          }).catch(() => {});
+          }).catch(() => { });
       }
     });
 
@@ -195,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') closeSearch();
       });
 
-      document.getElementById('globalSearchInput').addEventListener('input', function() {
+      document.getElementById('globalSearchInput').addEventListener('input', function () {
         clearTimeout(searchTimer);
         const q = this.value.trim();
         const resultsEl = document.getElementById('searchResults');
@@ -212,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) { resultsEl.innerHTML = '<p class="search-hint">Error al buscar</p>'; return; }
             const data = await res.json();
             renderResults(resultsEl, data, q);
-          } catch(e) {
+          } catch (e) {
             resultsEl.innerHTML = '<p class="search-hint">Error de conexión</p>';
           }
         }, 320);
@@ -220,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       function hl(text, q) {
         if (!text) return '';
-        const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+        const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
         return String(text).replace(re, '<mark>$1</mark>');
       }
 
@@ -236,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="search-item-icon">📄</span>
               <span class="search-item-body">
                 <span class="search-item-title">${hl(p.policyNumber, q)}</span>
-                <span class="search-item-sub">${hl(p.plate, q)} · ${p.insurer} · <span class="status-${(p.status||'').toLowerCase()}">${p.status}</span></span>
+                <span class="search-item-sub">${hl(p.plate, q)} · ${p.insurer} · <span class="status-${(p.status || '').toLowerCase()}">${p.status}</span></span>
               </span>
             </a>`;
           });
@@ -264,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="search-item-icon">👤</span>
               <span class="search-item-body">
                 <span class="search-item-title">${hl(u.fullName, q)}</span>
-                <span class="search-item-sub">${hl(u.email, q)} · ${(u.rol||'').replace('ROLE_','')}</span>
+                <span class="search-item-sub">${hl(u.email, q)} · ${(u.rol || '').replace('ROLE_', '')}</span>
               </span>
             </a>`;
           });
@@ -280,8 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function markActive(a) {
       const href = a.getAttribute('href');
       if (!href) return;
-      const isHome  = href === '/' && (path === '/' || path === '/index.html');
-      const isOther = href !== '/' && path.includes(href.replace('.html','').replace('/',''));
+      const isHome = href === '/' && (path === '/' || path === '/index.html');
+      const isOther = href !== '/' && path.includes(href.replace('.html', '').replace('/', ''));
       if (isHome || isOther) a.classList.add('active');
     }
     document.querySelectorAll('.nav-links a').forEach(markActive);
@@ -318,12 +319,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Todos los posibles links de navegación
     const allLinks = [
-      { href: '/',                label: '🏠 Inicio' },
-      { href: '/ranking.html',    label: '🏆 Ranking' },
+      { href: '/', label: '🏠 Inicio' },
+      { href: '/ranking.html', label: '🏆 Ranking' },
       { href: '/observatorio.html', label: '🗺️ Observatorio' },
-      { href: '/dashboard.html',  label: '📊 Panel de control',     auth: true },
-      { href: '/admin.html',      label: '⚙️ Administración', auth: true },
-      { href: '/perfil.html',     label: '👤 Mi Perfil',      auth: true },
+      { href: '/dashboard.html', label: '📊 Panel de control', auth: true },
+      { href: '/admin.html', label: '⚙️ Administración', auth: true },
+      { href: '/perfil.html', label: '👤 Mi Perfil', auth: true },
     ];
 
     allLinks.forEach(item => {
@@ -387,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // logout global
-  window.logout = function() {
+  window.logout = function () {
     localStorage.removeItem('megaSoatToken');
     localStorage.removeItem('megaSoatUser');
     window.location.replace(AUTH_REDIRECT);
