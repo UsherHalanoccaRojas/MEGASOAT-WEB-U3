@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('megaSoatTheme')||'dark')</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar SOAT — MegaSOAT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body data-requires-auth="true">
+    <header class="topbar">
+        <div class="brand"><div class="brand-icon">MS</div>Mega<span>SOAT</span></div>
+        <div class="nav-sep"></div>
+        <nav class="nav-links">
+            <a href="/">Inicio</a>
+            <a href="/portal.html">Verificar SOAT</a>
+            <a href="/ranking.html">Ranking</a>
+            <a href="/observatorio.html">Observatorio</a>
+            <a href="/dashboard.html" class="nav-auth" style="display:none">Panel de control</a>
+            <a href="/admin.html" class="nav-auth" style="display:none">Administración</a>
+        </nav>
+        <div class="nav-right">
+            <a href="/login" class="btn-nav-login nav-guest">Ingresar</a>
+            <div class="user-chip nav-auth" style="display:none">
+                <strong id="userLabel">—</strong>
+                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="panel" style="max-width:680px;margin:0 auto">
+            <h1>Verificar tu SOAT</h1>
+            <p class="lead">La función de búsqueda ha sido deshabilitada en esta instancia.</p>
+            <div style="margin-top:16px">
+                <a href="/" class="primary-button">Volver al inicio</a>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/js/animations.js" defer></script>
+    <script>
+        // Búsqueda deshabilitada — no hay scripts asociados
+    </script>
+</body>
+</html>
