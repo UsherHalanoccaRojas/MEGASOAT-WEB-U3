@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const labels = {
       '/': 'Inicio',
       '/index.html': 'Inicio',
-      '/portal.html': 'Verificar SOAT',
       '/ranking.html': 'Ranking',
       '/observatorio.html': 'Observatorio',
       '/dashboard.html': 'Panel de control',
@@ -320,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Todos los posibles links de navegación
     const allLinks = [
       { href: '/',                label: '🏠 Inicio' },
-      { href: '/portal.html',     label: '🔍 Verificar SOAT' },
       { href: '/ranking.html',    label: '🏆 Ranking' },
       { href: '/observatorio.html', label: '🗺️ Observatorio' },
       { href: '/dashboard.html',  label: '📊 Panel de control',     auth: true },
