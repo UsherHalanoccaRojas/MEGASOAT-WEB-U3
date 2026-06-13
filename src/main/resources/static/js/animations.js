@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── BÚSQUEDA GLOBAL (DESACTIVADA) ──
     // Desactivada porque la funcionalidad de búsqueda fue retirada del sistema.
+    const navRight = document.querySelector('.nav-right');
     if (navRight && false) {
       const searchBtn = document.createElement('button');
       searchBtn.className = 'global-search-btn';
@@ -389,6 +390,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // logout global
   window.logout = function () {
+    const token = localStorage.getItem('megaSoatToken');
+    if (token) {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).catch(() => {});
+    }
     localStorage.removeItem('megaSoatToken');
     localStorage.removeItem('megaSoatUser');
     window.location.replace(AUTH_REDIRECT);
