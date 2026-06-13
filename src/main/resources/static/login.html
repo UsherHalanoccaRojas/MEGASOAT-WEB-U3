@@ -338,19 +338,7 @@
         </div>
     </header>
 
-    <!-- Modal: cuenta ya en uso -->
-    <div class="session-overlay" id="sessionOverlay">
-        <div class="session-modal">
-            <div class="modal-icon">📱</div>
-            <h3>Cuenta en uso</h3>
-            <p>Esta cuenta ya tiene una sesión activa en otro dispositivo.<br>
-                ¿Deseas continuar aquí y cerrar la otra sesión?</p>
-            <div class="modal-actions">
-                <button class="btn-modal-cancel" id="modalCancel">Cancelar</button>
-                <button class="btn-modal-confirm" id="modalConfirm">Continuar aquí</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Contenido centrado -->
     <div class="login-center">
@@ -392,10 +380,7 @@
         const captchaCode = document.getElementById('captchaCode');
         const refreshBtn = document.getElementById('refreshCaptcha');
         const messageEl = document.getElementById('message');
-        const overlay = document.getElementById('sessionOverlay');
         let captchaId = null;
-        let pendingEmail = null;
-        let pendingPassword = null;
 
         async function loadCaptcha() {
             try {
@@ -437,15 +422,7 @@
                     body: JSON.stringify({ email, password, captchaId, captchaAnswer })
                 });
 
-                if (res.status === 409) {
-                    // Cuenta activa en otro dispositivo → mostrar modal
-                    pendingEmail = email;
-                    pendingPassword = password;
-                    overlay.classList.add('visible');
-                    button.textContent = 'Iniciar sesión';
-                    button.disabled = false;
-                    return;
-                }
+
                 if (!res.ok) {
                     if (res.status === 400) throw new Error('Captcha expirado — toca ↻ Nuevo');
                     if (res.status === 401) throw new Error('Correo o contraseña incorrectos');
@@ -460,41 +437,7 @@
             }
         });
 
-        // Modal: cancelar
-        document.getElementById('modalCancel').addEventListener('click', () => {
-            overlay.classList.remove('visible');
-            pendingEmail = pendingPassword = null;
-            loadCaptcha();
-        });
 
-        // Modal: continuar aquí (force-login, sin captcha)
-        document.getElementById('modalConfirm').addEventListener('click', async () => {
-            overlay.classList.remove('visible');
-            button.textContent = 'Ingresando...';
-            button.disabled = true;
-
-            try {
-                const res = await fetch('/api/auth/force-login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: pendingEmail, password: pendingPassword })
-                });
-
-                if (!res.ok) {
-                    showMsg('Error al reconectar. Intenta de nuevo.', 'error');
-                    button.textContent = 'Iniciar sesión';
-                    button.disabled = false;
-                    loadCaptcha();
-                    return;
-                }
-                saveSessionAndRedirect(await res.json());
-            } catch (e) {
-                showMsg('Error de red. Intenta de nuevo.', 'error');
-                button.textContent = 'Iniciar sesión';
-                button.disabled = false;
-                loadCaptcha();
-            }
-        });
 
         document.getElementById('password').addEventListener('keyup', e => {
             if (e.key === 'Enter') button.click();

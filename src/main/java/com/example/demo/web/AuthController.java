@@ -62,12 +62,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-            // Verificar sesión activa en otro dispositivo
             UserAccount account = userManagementPort.findByEmail(userDetails.getUsername()).orElse(null);
-            if (account != null && account.getSessionToken() != null && !account.getSessionToken().isBlank()) {
-                logger.info("Session conflict for {}: already logged in", userDetails.getUsername());
-                return ResponseEntity.status(409).body(Map.of("conflict", true, "email", userDetails.getUsername()));
-            }
 
             Set<String> roles = userDetails.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
@@ -96,33 +91,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/force-login")
-    public ResponseEntity<?> forceLogin(@RequestBody Map<String, String> request) {
-        String email    = request.get("email");
-        String password = request.get("password");
-        if (email == null || password == null) return ResponseEntity.badRequest().build();
 
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password));
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-            Set<String> roles = userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toSet());
-            String token = jwtTokenProvider.generateToken(userDetails.getUsername(), roles);
-
-            userManagementPort.findByEmail(userDetails.getUsername()).ifPresent(acc -> {
-                acc.setSessionToken(token);
-                userManagementPort.updateUser(acc);
-            });
-
-            logger.info("Force-login: session replaced for {}", userDetails.getUsername());
-            return ResponseEntity.ok(new AuthResponseDTO(token, userDetails.getUsername(), roles));
-        } catch (BadCredentialsException ex) {
-            return ResponseEntity.status(401).build();
-        }
-    }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
