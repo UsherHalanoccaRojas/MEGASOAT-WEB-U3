@@ -2,7 +2,7 @@ package com.example.demo.web;
 
 import com.example.demo.application.port.in.PointOfSalePort;
 import com.example.demo.domain.model.PointOfSale;
-import com.example.demo.web.dto.PointOfSaleRequest;
+import com.example.demo.web.dto.PointOfSaleRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +26,7 @@ public class PointOfSaleController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN','COMERCIAL')")
-    public ResponseEntity<PointOfSale> create(@RequestBody PointOfSaleRequest request) {
+    public ResponseEntity<PointOfSale> create(@RequestBody PointOfSaleRequestDTO request) {
         PointOfSale pos = new PointOfSale(request.getName(), request.getCity());
         pos.setResponsible(request.getResponsible());
         return ResponseEntity.ok(pointOfSalePort.createPointOfSale(pos));
@@ -40,7 +40,7 @@ public class PointOfSaleController {
 
     @PostMapping("/{id}/responsible")
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN','COMERCIAL')")
-    public ResponseEntity<PointOfSale> assignResponsible(@PathVariable Long id, @RequestBody PointOfSaleRequest request) {
+    public ResponseEntity<PointOfSale> assignResponsible(@PathVariable Long id, @RequestBody PointOfSaleRequestDTO request) {
         return ResponseEntity.ok(pointOfSalePort.assignResponsible(id, request.getResponsible()));
     }
 

@@ -1,6 +1,6 @@
 package com.example.demo.web.dto;
 
-public class LoginRequest {
+public class LoginRequestDTO {
     private String email;
     private String password;
     private String captchaId;

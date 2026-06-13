@@ -5,9 +5,9 @@ import com.example.demo.domain.model.RoleName;
 import com.example.demo.domain.model.UserAccount;
 import com.example.demo.infrastructure.monitoring.ActivityMonitoringService;
 import com.example.demo.infrastructure.security.JwtTokenProvider;
-import com.example.demo.web.dto.AuthResponse;
-import com.example.demo.web.dto.LoginRequest;
-import com.example.demo.web.dto.RegisterRequest;
+import com.example.demo.web.dto.AuthResponseDTO;
+import com.example.demo.web.dto.LoginRequestDTO;
+import com.example.demo.web.dto.RegisterRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
         if (request.getCaptchaId() == null || request.getCaptchaAnswer() == null ||
                 !captchaService.validate(request.getCaptchaId(), request.getCaptchaAnswer())) {
             logger.info("Login attempt failed for {}: captcha invalid or expired", request.getEmail());
@@ -89,7 +89,7 @@ public class AuthController {
                     200,
                     "Inicio de sesión exitoso"
             );
-            return ResponseEntity.ok(new AuthResponse(token, userDetails.getUsername(), roles));
+            return ResponseEntity.ok(new AuthResponseDTO(token, userDetails.getUsername(), roles));
         } catch (BadCredentialsException ex) {
             logger.info("Login failed for {}: bad credentials", request.getEmail());
             return ResponseEntity.status(401).build();
@@ -118,7 +118,7 @@ public class AuthController {
             });
 
             logger.info("Force-login: session replaced for {}", userDetails.getUsername());
-            return ResponseEntity.ok(new AuthResponse(token, userDetails.getUsername(), roles));
+            return ResponseEntity.ok(new AuthResponseDTO(token, userDetails.getUsername(), roles));
         } catch (BadCredentialsException ex) {
             return ResponseEntity.status(401).build();
         }
@@ -137,7 +137,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request,
+    public ResponseEntity<AuthResponseDTO> register(@RequestBody RegisterRequestDTO request,
                                                  @AuthenticationPrincipal UserDetails userDetails,
                                                  HttpServletRequest httpRequest) {
         UserAccount user = new UserAccount(request.getFullName(), request.getEmail(), request.getPassword());
@@ -160,7 +160,7 @@ public class AuthController {
                     "Usuario creado: " + saved.getEmail()
             );
         }
-        return ResponseEntity.ok(new AuthResponse(token, saved.getEmail(), authorities));
+        return ResponseEntity.ok(new AuthResponseDTO(token, saved.getEmail(), authorities));
     }
 
 

@@ -2,7 +2,7 @@ package com.example.demo.web.dto;
 
 import java.util.List;
 
-public class RegisterRequest {
+public class RegisterRequestDTO {
     private String fullName;
     private String email;
     private String password;

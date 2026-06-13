@@ -1,6 +1,6 @@
 package com.example.demo.web.dto;
 
-public class PointOfSaleRequest {
+public class PointOfSaleRequestDTO {
     private String name;
     private String city;
     private String responsible;

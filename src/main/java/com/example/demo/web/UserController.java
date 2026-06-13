@@ -3,8 +3,8 @@ package com.example.demo.web;
 import com.example.demo.application.port.in.UserManagementPort;
 import com.example.demo.domain.model.RoleName;
 import com.example.demo.domain.model.UserAccount;
-import com.example.demo.web.dto.RoleAssignmentRequest;
-import com.example.demo.web.dto.UserDto;
+import com.example.demo.web.dto.RoleAssignmentRequestDTO;
+import com.example.demo.web.dto.UserDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,17 +30,17 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN')")
-    public ResponseEntity<List<UserDto>> listUsers() {
-        List<UserDto> users = userManagementPort.findAllUsers()
+    public ResponseEntity<List<UserDTO>> listUsers() {
+        List<UserDTO> users = userManagementPort.findAllUsers()
                 .stream()
-                .map(u -> new UserDto(u.getFullName(), u.getEmail(), u.getRol(), u.isActive(), u.getAvatarUrl()))
+                .map(u -> new UserDTO(u.getFullName(), u.getEmail(), u.getRol(), u.isActive(), u.getAvatarUrl()))
                 .toList();
         return ResponseEntity.ok(users);
     }
 
     @PostMapping("/assign-role")
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN')")
-    public ResponseEntity<UserAccount> assignRole(@RequestBody RoleAssignmentRequest request) {
+    public ResponseEntity<UserAccount> assignRole(@RequestBody RoleAssignmentRequestDTO request) {
         RoleName roleName = RoleName.fromValue(request.getRole().replace("ROLE_", ""));
         UserAccount updated = userManagementPort.assignRole(request.getEmail(), roleName);
         return ResponseEntity.ok(updated);

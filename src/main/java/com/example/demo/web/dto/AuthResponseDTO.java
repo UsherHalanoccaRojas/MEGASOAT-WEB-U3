@@ -2,12 +2,12 @@ package com.example.demo.web.dto;
 
 import java.util.Set;
 
-public class AuthResponse {
+public class AuthResponseDTO {
     private String token;
     private String email;
     private Set<String> roles;
 
-    public AuthResponse(String token, String email, Set<String> roles) {
+    public AuthResponseDTO(String token, String email, Set<String> roles) {
         this.token = token;
         this.email = email;
         this.roles = roles;

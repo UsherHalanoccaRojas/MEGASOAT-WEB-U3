@@ -1,13 +1,13 @@
 package com.example.demo.web.dto;
 
-public class UserDto {
+public class UserDTO {
     private String nombre;
     private String email;
     private String rol;
     private String estado;
     private String avatarUrl;
 
-    public UserDto(String nombre, String email, String rol, boolean activo, String avatarUrl) {
+    public UserDTO(String nombre, String email, String rol, boolean activo, String avatarUrl) {
         this.nombre = nombre;
         this.email = email;
         this.rol = rol;

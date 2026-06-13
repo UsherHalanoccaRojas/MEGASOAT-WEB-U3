@@ -1,6 +1,6 @@
 package com.example.demo.web.dto;
 
-public class RoleAssignmentRequest {
+public class RoleAssignmentRequestDTO {
     private String email;
     private String role;
 

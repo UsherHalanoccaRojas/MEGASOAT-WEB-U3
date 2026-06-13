@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public class VoucherRequest {
+public class VoucherRequestDTO {
 
     @NotBlank(message = "El número de operación es obligatorio")
     private String operationNumber;

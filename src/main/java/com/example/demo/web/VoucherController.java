@@ -2,7 +2,7 @@ package com.example.demo.web;
 
 import com.example.demo.application.port.in.VoucherPort;
 import com.example.demo.domain.model.Voucher;
-import com.example.demo.web.dto.VoucherRequest;
+import com.example.demo.web.dto.VoucherRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +22,7 @@ public class VoucherController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN','COMERCIAL')")
-    public ResponseEntity<Voucher> register(@RequestBody VoucherRequest request) {
+    public ResponseEntity<Voucher> register(@RequestBody VoucherRequestDTO request) {
         Voucher voucher = new Voucher();
         voucher.setOperationNumber(request.getOperationNumber());
         voucher.setBank(request.getBank());
