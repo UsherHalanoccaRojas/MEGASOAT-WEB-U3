@@ -18,13 +18,4 @@ public class BusinessDTOs {
         }
     }
     
-    public record VoucherRequestDTO(
-            @NotBlank(message = "El número de operación es obligatorio") String operationNumber,
-            @NotBlank(message = "El banco es obligatorio") String bank,
-            @NotNull(message = "El monto es obligatorio") @Positive(message = "El monto debe ser positivo") BigDecimal amount,
-            @NotBlank(message = "El tipo de operación es obligatorio") String type,
-            @NotNull(message = "La fecha de operación es obligatoria") LocalDate operationDate,
-            LocalTime operationTime,
-            @NotNull(message = "El usuario que registra es obligatorio") Long registeredBy
-    ) {}
 }
