@@ -5,9 +5,7 @@ import com.example.demo.domain.model.RoleName;
 import com.example.demo.domain.model.UserAccount;
 import com.example.demo.infrastructure.monitoring.ActivityMonitoringService;
 import com.example.demo.infrastructure.security.JwtTokenProvider;
-import com.example.demo.web.dto.AuthResponseDTO;
-import com.example.demo.web.dto.LoginRequestDTO;
-import com.example.demo.web.dto.RegisterRequestDTO;
+import com.example.demo.web.dto.AuthDTOs.*;
 import org.springframework.http.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,15 +49,15 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO request, HttpServletRequest httpRequest) {
-        if (request.getCaptchaId() == null || request.getCaptchaAnswer() == null ||
-                !captchaService.validate(request.getCaptchaId(), request.getCaptchaAnswer())) {
-            logger.info("Login attempt failed for {}: captcha invalid or expired", request.getEmail());
+        if (request.captchaId() == null || request.captchaAnswer() == null ||
+                !captchaService.validate(request.captchaId(), request.captchaAnswer())) {
+            logger.info("Login attempt failed for {}: captcha invalid or expired", request.email());
             return ResponseEntity.status(400).build();
         }
 
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password()));
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             UserAccount account = userManagementPort.findByEmail(userDetails.getUsername()).orElse(null);
@@ -86,7 +84,7 @@ public class AuthController {
             );
             return ResponseEntity.ok(new AuthResponseDTO(token, userDetails.getUsername(), roles));
         } catch (BadCredentialsException ex) {
-            logger.info("Login failed for {}: bad credentials", request.getEmail());
+            logger.info("Login failed for {}: bad credentials", request.email());
             return ResponseEntity.status(401).build();
         }
     }
@@ -109,8 +107,8 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTO> register(@RequestBody RegisterRequestDTO request,
                                                  @AuthenticationPrincipal UserDetails userDetails,
                                                  HttpServletRequest httpRequest) {
-        UserAccount user = new UserAccount(request.getFullName(), request.getEmail(), request.getPassword());
-        List<RoleName> roles = request.getRoles().stream()
+        UserAccount user = new UserAccount(request.fullName(), request.email(), request.password());
+        List<RoleName> roles = request.roles().stream()
                 .map(role -> RoleName.fromValue(role.replace("ROLE_", "")))
                 .collect(Collectors.toList());
         UserAccount saved = userManagementPort.register(user, roles);
