@@ -6,7 +6,6 @@
     import com.example.demo.domain.model.RoleName;
     import com.example.demo.domain.model.UserAccount;
     import com.example.demo.infrastructure.persistence.UserRepository;
-    import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +17,9 @@
     public class UserManagementService implements UserManagementPort {
 
         private final UserRepository userRepository;
-        private final PasswordEncoder passwordEncoder;
 
-        public UserManagementService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        public UserManagementService(UserRepository userRepository) {
             this.userRepository = userRepository;
-            this.passwordEncoder = passwordEncoder;
         }
 
 @Override
@@ -34,8 +31,8 @@ public UserAccount register(UserAccount user, List<RoleName> roles) {
         throw new IllegalArgumentException("Se debe asignar al menos un rol al usuario");
     }
 
-    // Encriptar contraseña
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    // Sin encriptación
+    user.setPassword(user.getPassword());
 
     // Asignar primer rol como texto
     user.setRol(roles.get(0).name());
@@ -73,7 +70,7 @@ public void resetPassword(String email, String newPassword) {
     }
     UserAccount user = userRepository.findByEmail(email)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
-    user.setPassword(passwordEncoder.encode(newPassword));
+    user.setPassword(newPassword);
     userRepository.save(user);
 }
 
@@ -102,10 +99,10 @@ public void changePassword(String email, String currentPassword, String newPassw
     }
     UserAccount user = userRepository.findByEmail(email)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
-    if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+    if (!currentPassword.equals(user.getPassword())) {
         throw new IllegalArgumentException("Contraseña actual incorrecta");
     }
-    user.setPassword(passwordEncoder.encode(newPassword));
+    user.setPassword(newPassword);
     userRepository.save(user);
 }
 

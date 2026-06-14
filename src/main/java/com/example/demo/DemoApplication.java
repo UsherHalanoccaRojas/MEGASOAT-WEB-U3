@@ -1,6 +1,5 @@
 package com.example.demo;
 
-import com.example.demo.infrastructure.security.DualPasswordEncoder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +16,6 @@ public class DemoApplication {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new DualPasswordEncoder();
+		return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
 	}
 }

@@ -1,7 +1,6 @@
 package com.example.demo.application.service;
 
 import com.example.demo.application.port.in.NotificationPort;
-import com.example.demo.infrastructure.service.EmailSender;
 import com.example.demo.infrastructure.service.WebSocketPublisher;
 import com.example.demo.infrastructure.persistence.NotificationRepository;
 import org.springframework.stereotype.Service;
@@ -13,19 +12,12 @@ import java.util.List;
 @Transactional
 public class NotificationService implements NotificationPort {
 
-    private final EmailSender emailSender;
     private final WebSocketPublisher webSocketPublisher;
     private final NotificationRepository notificationRepository;
 
-    public NotificationService(EmailSender emailSender, WebSocketPublisher webSocketPublisher, NotificationRepository notificationRepository) {
-        this.emailSender = emailSender;
+    public NotificationService(WebSocketPublisher webSocketPublisher, NotificationRepository notificationRepository) {
         this.webSocketPublisher = webSocketPublisher;
         this.notificationRepository = notificationRepository;
-    }
-
-    @Override
-    public void sendRenewalEmail(String email, String subject, String message) {
-        emailSender.sendEmail(email, subject, message);
     }
 
     @Override
