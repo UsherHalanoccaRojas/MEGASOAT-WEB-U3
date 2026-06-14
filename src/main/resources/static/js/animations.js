@@ -59,31 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.requireAuth = requireAuth;
   trackPageNavigation(window.location.pathname, 'page-load');
 
-  // ══════════════════════════════════════
-  // INYECTAR SISTEMA DE FONDO (4 capas)
-  // ══════════════════════════════════════
-  (function injectBackground() {
-    const bgBase = document.createElement('div');
-    bgBase.className = 'bg-base';
-    document.body.insertBefore(bgBase, document.body.firstChild);
 
-    const aurora = document.createElement('div');
-    aurora.className = 'aurora-bg';
-    aurora.innerHTML = `
-      <div class="aurora-blob aurora-1"></div>
-      <div class="aurora-blob aurora-2"></div>
-      <div class="aurora-blob aurora-3"></div>
-      <div class="aurora-blob aurora-4"></div>`;
-    document.body.insertBefore(aurora, document.body.firstChild);
-
-    const grid = document.createElement('div');
-    grid.className = 'dot-grid';
-    document.body.insertBefore(grid, document.body.firstChild);
-
-    const vignette = document.createElement('div');
-    vignette.className = 'vignette';
-    document.body.insertBefore(vignette, document.body.firstChild);
-  })();
 
   // ══════════════════════════════════════
   // NAV DINÁMICA + HAMBURGER MÓVIL
@@ -414,70 +390,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ══════════════════════════════════════
-  // ANIMACIONES DE ENTRADA (feature cards)
-  // ══════════════════════════════════════
-  const panel = document.querySelector('.panel');
-  if (panel) {
-    panel.querySelectorAll('.feature, .stagger').forEach((el, i) => {
-      el.style.animation = `fadeUp .55s ${0.07 + 0.08 * i}s both`;
-    });
-  }
 
-  // ══════════════════════════════════════
-  // TOPBAR — sombra al hacer scroll
-  // ══════════════════════════════════════
-  const topbar = document.querySelector('.topbar');
-  if (topbar) {
-    window.addEventListener('scroll', () => {
-      topbar.style.boxShadow = window.scrollY > 30 ? '0 4px 28px rgba(0,0,0,0.5)' : 'none';
-    }, { passive: true });
-  }
-
-  // ══════════════════════════════════════
-  // OVERLAY DE CARGA
-  // ══════════════════════════════════════
-  function createLoadingOverlay() {
-    let ex = document.querySelector('.loading-overlay');
-    if (ex) return ex;
-    const ov = document.createElement('div');
-    ov.className = 'loading-overlay';
-    const c = document.createElement('div');
-    c.className = 'loading-dots';
-    for (let i = 0; i < 3; i++) {
-      const d = document.createElement('div');
-      d.className = 'dot-loading';
-      d.style.animationDelay = (i * 0.15) + 's';
-      c.appendChild(d);
-    }
-    ov.appendChild(c);
-    document.body.appendChild(ov);
-    return ov;
-  }
-
-  // ══════════════════════════════════════
-  // TRANSICIONES ENTRE PÁGINAS
-  // ══════════════════════════════════════
-  document.querySelectorAll('a[href]').forEach(a => {
-    const href = a.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('javascript')) return;
-    a.addEventListener('click', e => {
-      e.preventDefault();
-
-      const targetPath = href.startsWith('/') ? href.split('?')[0] : null;
-      if (targetPath) {
-        trackPageNavigation(targetPath, 'link-click');
-      }
-
-      const loading = createLoadingOverlay();
-      requestAnimationFrame(() => loading.classList.add('show'));
-      document.body.classList.add('page-exit');
-      setTimeout(() => { window.location.href = href; }, 380);
-    });
-  });
-
-  // ══════════════════════════════════════
-  // ANIMACIÓN DE ENTRADA DE PÁGINA
-  // ══════════════════════════════════════
-  requestAnimationFrame(() => document.body.classList.add('page-enter'));
 });
