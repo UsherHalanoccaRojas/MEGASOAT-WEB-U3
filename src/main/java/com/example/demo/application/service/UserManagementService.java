@@ -65,4 +65,58 @@ public UserAccount assignRole(String email, RoleName role) {
 public UserAccount updateUser(UserAccount user) {
     return userRepository.save(user);
 }
+
+@Override
+public void resetPassword(String email, String newPassword) {
+    if (newPassword == null || newPassword.length() < 6) {
+        throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
+    }
+    UserAccount user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+}
+
+@Override
+public void toggleActive(String email, boolean active) {
+    UserAccount user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
+    user.setActive(active);
+    userRepository.save(user);
+}
+
+@Override
+public UserAccount updateProfile(String email, String fullName) {
+    UserAccount user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
+    if (fullName != null && !fullName.isBlank()) {
+        user.setFullName(fullName.trim());
+    }
+    return userRepository.save(user);
+}
+
+@Override
+public void changePassword(String email, String currentPassword, String newPassword) {
+    if (newPassword == null || newPassword.length() < 6) {
+        throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
+    }
+    UserAccount user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
+    if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+        throw new IllegalArgumentException("Contraseña actual incorrecta");
+    }
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+}
+
+@Override
+public UserAccount updateAvatar(String email, String avatarUrl) {
+    if (avatarUrl == null || avatarUrl.isBlank()) {
+        throw new IllegalArgumentException("Avatar inválido");
+    }
+    UserAccount user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
+    user.setAvatarUrl(avatarUrl);
+    return userRepository.save(user);
+}
     }

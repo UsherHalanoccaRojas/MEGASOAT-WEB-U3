@@ -17,4 +17,14 @@ public interface UserManagementPort {
     UserAccount assignRole(String email, RoleName role);
 
     UserAccount updateUser(UserAccount user);
+
+    void resetPassword(String email, String newPassword);
+
+    void toggleActive(String email, boolean active);
+
+    UserAccount updateProfile(String email, String fullName);
+
+    void changePassword(String email, String currentPassword, String newPassword);
+
+    UserAccount updateAvatar(String email, String avatarUrl);
 }

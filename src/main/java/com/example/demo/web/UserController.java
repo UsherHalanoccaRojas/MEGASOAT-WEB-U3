@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -20,11 +19,9 @@ import java.util.Map;
 public class UserController {
 
     private final UserManagementPort userManagementPort;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserManagementPort userManagementPort, PasswordEncoder passwordEncoder) {
+    public UserController(UserManagementPort userManagementPort) {
         this.userManagementPort = userManagementPort;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
@@ -50,13 +47,14 @@ public class UserController {
     public ResponseEntity<Void> resetPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         String newPassword = body.get("newPassword");
-        if (email == null || newPassword == null || newPassword.length() < 6)
+        try {
+            userManagementPort.resetPassword(email, newPassword);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
-        userManagementPort.findByEmail(email).ifPresent(user -> {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userManagementPort.updateUser(user);
-        });
-        return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/toggle-active")
@@ -65,11 +63,12 @@ public class UserController {
         String email = (String) body.get("email");
         Boolean active = (Boolean) body.get("active");
         if (email == null || active == null) return ResponseEntity.badRequest().build();
-        userManagementPort.findByEmail(email).ifPresent(user -> {
-            user.setActive(active);
-            userManagementPort.updateUser(user);
-        });
-        return ResponseEntity.ok().build();
+        try {
+            userManagementPort.toggleActive(email, active);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // ── PERFIL DEL USUARIO AUTENTICADO ──────────────────────────
@@ -94,52 +93,50 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> updateMyProfile(
             @RequestBody Map<String, String> body,
             @AuthenticationPrincipal UserDetails userDetails) {
-        return userManagementPort.findByEmail(userDetails.getUsername())
-                .map(u -> {
-                    String fullName = body.get("fullName");
-                    if (fullName != null && !fullName.isBlank()) u.setFullName(fullName.trim());
-                    userManagementPort.updateUser(u);
-                    Map<String, Object> res = new HashMap<>();
-                    res.put("fullName", u.getFullName());
-                    res.put("email",    u.getEmail());
-                    res.put("rol",      u.getRol());
-                    return ResponseEntity.ok(res);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            UserAccount u = userManagementPort.updateProfile(userDetails.getUsername(), body.get("fullName"));
+            Map<String, Object> res = new HashMap<>();
+            res.put("fullName", u.getFullName());
+            res.put("email",    u.getEmail());
+            res.put("rol",      u.getRol());
+            return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/me/password")
     public ResponseEntity<Map<String, String>> changeMyPassword(
             @RequestBody Map<String, String> body,
             @AuthenticationPrincipal UserDetails userDetails) {
-        String currentPassword = body.get("currentPassword");
-        String newPassword     = body.get("newPassword");
-        if (newPassword == null || newPassword.length() < 6)
-            return ResponseEntity.badRequest().body(Map.of("error", "La contraseña debe tener al menos 6 caracteres"));
-        return userManagementPort.findByEmail(userDetails.getUsername())
-                .map(u -> {
-                    if (!passwordEncoder.matches(currentPassword, u.getPassword()))
-                        return ResponseEntity.status(401).<Map<String, String>>body(Map.of("error", "Contraseña actual incorrecta"));
-                    u.setPassword(passwordEncoder.encode(newPassword));
-                    userManagementPort.updateUser(u);
-                    return ResponseEntity.ok(Map.of("message", "Contraseña actualizada correctamente"));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            userManagementPort.changePassword(
+                    userDetails.getUsername(),
+                    body.get("currentPassword"),
+                    body.get("newPassword")
+            );
+            return ResponseEntity.ok(Map.of("message", "Contraseña actualizada correctamente"));
+        } catch (IllegalArgumentException e) {
+            if ("Contraseña actual incorrecta".equals(e.getMessage())) {
+                return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
+            }
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/me/avatar")
     public ResponseEntity<Map<String, String>> updateMyAvatar(
             @RequestBody Map<String, String> body,
             @AuthenticationPrincipal UserDetails userDetails) {
-        String avatarUrl = body.get("avatarUrl");
-        if (avatarUrl == null || avatarUrl.isBlank())
-            return ResponseEntity.badRequest().body(Map.of("error", "Avatar inválido"));
-        return userManagementPort.findByEmail(userDetails.getUsername())
-                .map(u -> {
-                    u.setAvatarUrl(avatarUrl);
-                    userManagementPort.updateUser(u);
-                    return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            UserAccount u = userManagementPort.updateAvatar(userDetails.getUsername(), body.get("avatarUrl"));
+            return ResponseEntity.ok(Map.of("avatarUrl", u.getAvatarUrl()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
