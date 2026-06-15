@@ -287,13 +287,7 @@
             </div>
         </div>
 
-        <div class="table-wrap" style="margin-top:16px">
-                <table class="table">
-                    <thead><tr><th>N° Póliza</th><th>Placa</th><th>Aseguradora</th><th>Tipo vehículo</th><th>Prima</th><th>Vencimiento</th><th>Estado</th></tr></thead>
-                    <tbody id="policiesBody"><tr><td colspan="7" class="alert-empty">Cargando...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
+
 
         <!-- ─── MONITOREO ─── -->
         <div id="tab-monitoring" class="tab-panel">
@@ -356,26 +350,7 @@
         </div>
     </div>
 
-    <div class="form-row cols-2">
-                <div class="form-group"><label>Monto (S/)</label><input id="vAmount" type="number" step="0.01"></div>
-                <div class="form-group"><label>Tipo</label>
-                    <select id="vType">
-                        <option value="DEPOSITO">DEPOSITO</option>
-                        <option value="TRANSFERENCIA">TRANSFERENCIA</option>
-                        <option value="EFECTIVO">EFECTIVO</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row cols-2">
-                <div class="form-group"><label>Fecha operación</label><input id="vDate" type="date"></div>
-                <div class="form-group"><label>Observaciones</label><input id="vObs" type="text" placeholder="Opcional"></div>
-            </div>
-            <div class="form-actions">
-                <button class="primary-button" onclick="createVoucher()">Registrar</button>
-                <button class="btn-secondary" onclick="closeModal('modalNewVoucher')">Cancelar</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -710,33 +685,6 @@
         }
 
         // ── MONITOREO ──
-        async function loadPolicies() {
-            try {
-                const res = await fetch('/api/portal/policies', { headers: H() });
-                const data = await res.json();
-                renderPolicies(data);
-            } catch(e) {
-                document.getElementById('policiesBody').innerHTML = '<tr><td colspan="7" class="alert-empty">Error al cargar</td></tr>';
-            }
-        }
-
-        // Búsqueda de pólizas deshabilitada en esta instancia
-
-        function renderPolicies(data) {
-            const tbody = document.getElementById('policiesBody');
-            if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="7" class="alert-empty">Sin pólizas</td></tr>'; return; }
-            tbody.innerHTML = data.map(p => {
-                const exp = p.dueDate && new Date(p.dueDate) < new Date();
-                return `<tr>
-                    <td><strong>${p.policyNumber||'—'}</strong></td>
-                    <td>${p.vehiclePlate}</td>
-                    <td>${p.insurer}</td>
-                    <td>${p.vehicleType}</td>
-                    <td>S/ ${Number(p.premium).toFixed(2)}</td>
-                    <td>${p.dueDate||'—'}</td>
-                    <td><span class="badge ${exp?'high':'low'}">${exp?'VENCIDA':'ACTIVA'}</span></td>
-                </tr>`;}).join('');
-        }
 
         async function loadMonitoring() {
             if (!isSuperadmin) return;

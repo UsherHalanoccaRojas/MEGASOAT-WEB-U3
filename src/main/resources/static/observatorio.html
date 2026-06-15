@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <!-- Tema claro por defecto -->
@@ -10,45 +11,75 @@
     <link rel="stylesheet" href="/css/site.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <style>
-        #map { height: 500px; width: 100%; border-radius: 0 0 var(--radius) var(--radius); }
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
 
         /* Popup glassmorphism */
         .leaflet-popup-content-wrapper {
             background: rgba(12, 18, 40, 0.94);
             backdrop-filter: blur(18px);
             color: #e6eef1;
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
             transition: background .28s, color .28s, border-color .28s;
         }
-        .leaflet-popup-tip { background: rgba(12,18,40,0.94); transition: background .28s; }
-        .leaflet-popup-close-button { color: #8892a4 !important; font-size: 18px !important; top: 10px !important; right: 10px !important; }
-        .leaflet-popup-close-button:hover { color: var(--text) !important; }
-        .leaflet-popup-content { margin: 16px 18px; }
+
+        .leaflet-popup-tip {
+            background: rgba(12, 18, 40, 0.94);
+            transition: background .28s;
+        }
+
+        .leaflet-popup-close-button {
+            color: #8892a4 !important;
+            font-size: 18px !important;
+            top: 10px !important;
+            right: 10px !important;
+        }
+
+        .leaflet-popup-close-button:hover {
+            color: var(--text) !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 16px 18px;
+        }
 
         /* Controles del mapa */
         .leaflet-control-zoom a {
-            background: rgba(12,18,40,0.9) !important;
+            background: rgba(12, 18, 40, 0.9) !important;
             color: #e2e8f0 !important;
-            border-color: rgba(255,255,255,0.1) !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
             backdrop-filter: blur(8px);
             transition: background .25s, color .25s !important;
         }
-        .leaflet-control-zoom a:hover { background: rgba(6,182,212,0.15) !important; color: #06b6d4 !important; }
-        .leaflet-control-attribution { background: rgba(4,8,18,0.75) !important; color: #555 !important; font-size: .7rem; }
+
+        .leaflet-control-zoom a:hover {
+            background: rgba(6, 182, 212, 0.15) !important;
+            color: #06b6d4 !important;
+        }
+
+        .leaflet-control-attribution {
+            background: rgba(4, 8, 18, 0.75) !important;
+            color: #555 !important;
+            font-size: .7rem;
+        }
 
         /* Leyenda flotante */
         .map-legend {
-            background: rgba(12,18,40,0.90);
+            background: rgba(12, 18, 40, 0.90);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 10px 14px;
             font-family: 'Inter', sans-serif;
             font-size: .78rem;
             transition: background .28s, border-color .28s;
         }
+
         .map-legend-title {
             font-weight: 700;
             color: #e8edf5;
@@ -57,6 +88,7 @@
             letter-spacing: .03em;
             transition: color .28s;
         }
+
         .map-legend-row {
             display: flex;
             align-items: center;
@@ -65,54 +97,80 @@
             color: #c8d3e0;
             transition: color .28s;
         }
+
         .map-legend-dot {
-            width: 12px; height: 12px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             flex-shrink: 0;
             box-shadow: 0 0 6px currentColor;
         }
+
         .map-legend-divider {
-            margin-top: 8px; padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         /* ── TEMA CLARO — Mapa ── */
         [data-theme="light"] .leaflet-popup-content-wrapper {
-            background: rgba(255,255,255,0.97);
+            background: rgba(255, 255, 255, 0.97);
             color: #1a202c;
-            border: 1px solid rgba(0,0,0,0.08);
-            box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.14);
         }
-        [data-theme="light"] .leaflet-popup-tip { background: rgba(255,255,255,0.97); }
-        [data-theme="light"] .leaflet-popup-close-button { color: #64748b !important; }
+
+        [data-theme="light"] .leaflet-popup-tip {
+            background: rgba(255, 255, 255, 0.97);
+        }
+
+        [data-theme="light"] .leaflet-popup-close-button {
+            color: #64748b !important;
+        }
+
         [data-theme="light"] .leaflet-control-zoom a {
-            background: rgba(255,255,255,0.97) !important;
+            background: rgba(255, 255, 255, 0.97) !important;
             color: #334155 !important;
-            border-color: rgba(0,0,0,0.1) !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }
+
         [data-theme="light"] .leaflet-control-zoom a:hover {
-            background: rgba(6,182,212,0.1) !important;
+            background: rgba(6, 182, 212, 0.1) !important;
             color: #0891b2 !important;
         }
+
         [data-theme="light"] .leaflet-control-attribution {
-            background: rgba(255,255,255,0.88) !important;
+            background: rgba(255, 255, 255, 0.88) !important;
             color: #888 !important;
         }
+
         [data-theme="light"] .map-legend {
-            background: rgba(255,255,255,0.96);
-            border: 1px solid rgba(0,0,0,0.08);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
         }
-        [data-theme="light"] .map-legend-title { color: #1a202c; }
-        [data-theme="light"] .map-legend-row { color: #334155; }
-        [data-theme="light"] .map-legend-divider { border-top-color: rgba(0,0,0,0.08); }
-        [data-theme="light"] .map-popup-label { color: #64748b; }
+
+        [data-theme="light"] .map-legend-title {
+            color: #1a202c;
+        }
+
+        [data-theme="light"] .map-legend-row {
+            color: #334155;
+        }
+
+        [data-theme="light"] .map-legend-divider {
+            border-top-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .map-popup-label {
+            color: #64748b;
+        }
 
         /* Map card header gradient */
         .map-card-header {
             padding: 18px 22px;
-            background: linear-gradient(90deg, rgba(6,182,212,0.06) 0%, rgba(99,102,241,0.04) 100%);
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.06) 0%, rgba(99, 102, 241, 0.04) 100%);
             border-bottom: 1px solid var(--card-border);
             border-radius: var(--radius) var(--radius) 0 0;
             display: flex;
@@ -121,23 +179,37 @@
             gap: 12px;
             transition: border-color .28s;
         }
+
         .map-live-dot {
-            width: 8px; height: 8px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: #06b6d4;
             box-shadow: 0 0 8px #06b6d4;
             animation: blink 2s ease-in-out infinite;
         }
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.3
+            }
+        }
     </style>
 </head>
+
 <body data-requires-auth="true">
     <header class="topbar">
         <div class="brand">Mega<span>SOAT</span></div>
         <div class="nav-sep"></div>
         <nav class="nav-links">
             <a href="/">Inicio</a>
-<a href="/ranking.html">Ranking</a>
+            <a href="/ranking.html">Ranking</a>
             <a href="/observatorio.html">Observatorio</a>
             <a href="/dashboard.html" class="nav-auth" style="display:none">Panel de control</a>
             <a href="/admin.html" class="nav-auth" style="display:none">Administración</a>
@@ -157,18 +229,22 @@
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
                 <div>
                     <h1 style="font-size:1.8rem" class="text-gradient">Observatorio de Riesgos</h1>
-                    <p class="lead" style="margin-bottom:14px">Monitoreo geoespacial de morosidad por punto de venta y ciudad.</p>
+                    <p class="lead" style="margin-bottom:14px">Monitoreo geoespacial de morosidad por punto de venta y
+                        ciudad.</p>
                     <div style="display:flex;gap:10px;flex-wrap:wrap">
                         <span class="badge low" style="gap:6px;padding:5px 12px">
-                            <span style="width:7px;height:7px;border-radius:50%;background:#06b6d4;display:inline-block;box-shadow:0 0 6px #06b6d4"></span>
+                            <span
+                                style="width:7px;height:7px;border-radius:50%;background:#06b6d4;display:inline-block;box-shadow:0 0 6px #06b6d4"></span>
                             Bajo riesgo (&lt;10%)
                         </span>
                         <span class="badge medium" style="gap:6px;padding:5px 12px">
-                            <span style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 6px #f59e0b"></span>
+                            <span
+                                style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 6px #f59e0b"></span>
                             Riesgo medio (10–20%)
                         </span>
                         <span class="badge high" style="gap:6px;padding:5px 12px">
-                            <span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 6px #ef4444"></span>
+                            <span
+                                style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 6px #ef4444"></span>
                             Alto riesgo (&gt;20%)
                         </span>
                     </div>
@@ -211,7 +287,7 @@
 
         // Tile URLs por tema
         const TILE_URLS = {
-            dark:  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
             light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
         };
         let currentTile = null;
@@ -272,7 +348,7 @@
         }
 
         function riskColor(risk) {
-            if (risk === 'alto')  return '#ef4444';
+            if (risk === 'alto') return '#ef4444';
             if (risk === 'medio') return '#f59e0b';
             return '#06b6d4';
         }
@@ -284,7 +360,7 @@
 
         function createMarkerIcon(point) {
             const color = riskColor(point.risk);
-            const size  = Math.round(10 + Math.min(point.sales * 0.6, 22));
+            const size = Math.round(10 + Math.min(point.sales * 0.6, 22));
             const isPulsing = point.risk !== 'bajo';
 
             const html = `
@@ -297,7 +373,7 @@
                         position:absolute;inset:0;border-radius:50%;
                         background:${color};
                         opacity:0.9;
-                        box-shadow:0 0 ${size/2}px ${color}cc, 0 0 ${size}px ${color}55;
+                        box-shadow:0 0 ${size / 2}px ${color}cc, 0 0 ${size}px ${color}55;
                         border:2px solid rgba(255,255,255,0.25);
                     "></div>
                     <div style="
@@ -309,9 +385,9 @@
             return L.divIcon({
                 className: '',
                 html,
-                iconSize:   [size, size],
+                iconSize: [size, size],
                 iconAnchor: [size / 2, size / 2],
-                popupAnchor:[0, -(size / 2 + 6)]
+                popupAnchor: [0, -(size / 2 + 6)]
             });
         }
 
@@ -322,15 +398,15 @@
             <div class="map-popup">
                 <div class="map-popup-title">${point.name}</div>
                 <div class="map-popup-row">
-                    <span class="map-popup-label">📍 Ciudad</span>
+                    <span class="map-popup-label">Ciudad</span>
                     <span class="map-popup-value">${point.city}</span>
                 </div>
                 <div class="map-popup-row">
-                    <span class="map-popup-label">📋 SOAT vendidos</span>
+                    <span class="map-popup-label">SOAT vendidos</span>
                     <span class="map-popup-value" style="color:#06b6d4">${point.sales}</span>
                 </div>
                 <div class="map-popup-row">
-                    <span class="map-popup-label">⚠️ Morosidad</span>
+                    <span class="map-popup-label">Morosidad</span>
                     <span class="map-popup-value" style="color:${color}">${point.delinquency.toFixed(1)}%</span>
                 </div>
                 <div class="map-popup-bar-wrap">
@@ -345,7 +421,7 @@
         async function loadMap() {
             const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
             try {
-                const res  = await fetch('/api/dashboard/map', { headers });
+                const res = await fetch('/api/dashboard/map', { headers });
                 const data = await res.json();
 
                 clearMarkers();
@@ -365,9 +441,9 @@
                     });
 
                     markers.push(marker);
-                    if (point.risk === 'alto')       alto++;
+                    if (point.risk === 'alto') alto++;
                     else if (point.risk === 'medio') medio++;
-                    else                             bajo++;
+                    else bajo++;
                 });
 
                 document.getElementById('mapPointCount').textContent = `${data.length} puntos de venta`;
@@ -397,16 +473,16 @@
                 `;
 
                 // Alerts
-                const alertsEl   = document.getElementById('alerts');
+                const alertsEl = document.getElementById('alerts');
                 const alertCount = document.getElementById('alertCount');
-                const atRisk     = data.filter(p => p.risk !== 'bajo');
+                const atRisk = data.filter(p => p.risk !== 'bajo');
 
                 if (atRisk.length === 0) {
                     alertsEl.innerHTML = '<div class="alert-empty">Sin puntos de venta en riesgo medio o alto</div>';
                     alertCount.style.display = 'none';
                 } else {
-                    alertCount.textContent    = atRisk.length + ' alertas';
-                    alertCount.style.display  = 'inline-flex';
+                    alertCount.textContent = atRisk.length + ' alertas';
+                    alertCount.style.display = 'inline-flex';
                     alertsEl.innerHTML = atRisk
                         .sort((a, b) => b.delinquency - a.delinquency)
                         .map(p => {
@@ -428,7 +504,7 @@
                         }).join('');
                 }
 
-            } catch(e) {
+            } catch (e) {
                 console.error('Error cargando mapa:', e);
                 document.getElementById('alerts').innerHTML =
                     '<div class="alert"><strong>Error de conexión</strong><p>No se pudo cargar la información del mapa.</p></div>';
@@ -439,4 +515,5 @@
         loadMap();
     </script>
 </body>
+
 </html>
