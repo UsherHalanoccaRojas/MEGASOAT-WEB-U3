@@ -43,6 +43,7 @@ public class UserAccount {
         this.fullName = fullName;
         this.email = email;
         this.password = password;
+        this.username = email;
         this.active = true;
     }
 

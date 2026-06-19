@@ -37,6 +37,11 @@ public UserAccount register(UserAccount user, List<RoleName> roles) {
     // Asignar primer rol como texto
     user.setRol(roles.get(0).name());
 
+    // Garantizar que username no sea nulo (es obligatorio en DB)
+    if (user.getUsername() == null || user.getUsername().isBlank()) {
+        user.setUsername(user.getEmail());
+    }
+
     return userRepository.save(user);
  }
 
