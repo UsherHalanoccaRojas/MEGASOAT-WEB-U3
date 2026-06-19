@@ -37,7 +37,7 @@
       align-items: center; justify-content: center;
       gap: 3px;
       opacity: 0;
-      transition: opacity .2s ease;
+      
       color: #fff; font-size: .72rem; font-weight: 600;
       pointer-events: none;
     }
@@ -107,7 +107,7 @@
       font-size: .92rem;
       font-family: inherit;
       outline: none;
-      transition: border-color .2s ease, box-shadow .2s ease;
+      
     }
     .form-field input:focus {
       border-color: var(--accent);
@@ -128,10 +128,10 @@
       padding: 10px 28px;
       font-size: .92rem; font-weight: 600;
       cursor: pointer;
-      transition: opacity .2s ease, transform .15s ease;
+      
     }
-    .btn-save:hover { opacity: .88; transform: translateY(-1px); }
-    .btn-save:active { transform: translateY(0); opacity: 1; }
+    .btn-save:hover { opacity: .88;  }
+    .btn-save:active {  opacity: 1; }
 
     /* Alerta inline */
     .field-alert {
@@ -146,7 +146,7 @@
 
     /* Strength bar */
     .strength-bar-wrap { height: 4px; border-radius: 2px; background: var(--input-border); margin-top: 6px; overflow: hidden; }
-    .strength-bar { height: 100%; width: 0; border-radius: 2px; transition: width .3s ease, background .3s ease; }
+    .strength-bar { height: 100%; width: 0; border-radius: 2px;  }
 
     /* Light mode overrides */
     [data-theme="light"] .perfil-section {
@@ -238,7 +238,6 @@
       <div class="field-alert" id="alertPassword"></div>
     </div>
   </main>
-
   <script src="/js/animations.js"></script>
   <script>
     const API = '/api/users/me';
