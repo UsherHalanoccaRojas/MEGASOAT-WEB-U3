@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class BusinessDTOs {
-    public record PointOfSaleRequestDTO(String name, String city, String responsible) {}
+    public record PointOfSaleRequestDTO(String name, String city, String responsible, String email, String telefono, String direccion) {}
     
     public record RoleAssignmentRequestDTO(String email, String role) {}
     

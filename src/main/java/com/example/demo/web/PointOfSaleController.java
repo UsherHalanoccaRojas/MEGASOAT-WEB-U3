@@ -29,6 +29,23 @@ public class PointOfSaleController {
     public ResponseEntity<PointOfSale> create(@RequestBody PointOfSaleRequestDTO request) {
         PointOfSale pos = new PointOfSale(request.name(), request.city());
         pos.setResponsible(request.responsible());
+        pos.setEmail(request.email());
+        pos.setTelefono(request.telefono());
+        pos.setDireccion(request.direccion());
+        
+        // Generate a unique code (codigo) for the new point of sale
+        String cityPrefix = request.city() != null && !request.city().trim().isEmpty() 
+            ? request.city().trim().toUpperCase().replaceAll("[^A-Z]", "") 
+            : "GEN";
+        if (cityPrefix.length() > 5) {
+            cityPrefix = cityPrefix.substring(0, 5);
+        }
+        String generatedCode = "PV-" + cityPrefix + "-" + String.format("%03d", (int)(Math.random() * 1000));
+        pos.setCodigo(generatedCode);
+        
+        pos.setFechaRegistro(java.time.LocalDateTime.now());
+        pos.setFechaActualizacion(java.time.LocalDateTime.now());
+
         return ResponseEntity.ok(pointOfSalePort.createPointOfSale(pos));
     }
 
