@@ -38,6 +38,12 @@ public class PointOfSaleController {
         return ResponseEntity.ok(pointOfSalePort.deactivatePointOfSale(id));
     }
 
+    @PostMapping("/{id}/activate")
+    @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN')")
+    public ResponseEntity<PointOfSale> activate(@PathVariable Long id) {
+        return ResponseEntity.ok(pointOfSalePort.activatePointOfSale(id));
+    }
+
     @PostMapping("/{id}/responsible")
     @PreAuthorize("hasAnyRole('SUPERADMIN','ADMIN','COMERCIAL')")
     public ResponseEntity<PointOfSale> assignResponsible(@PathVariable Long id, @RequestBody PointOfSaleRequest request) {

@@ -10,6 +10,8 @@ public interface PointOfSalePort {
 
     PointOfSale deactivatePointOfSale(Long id);
 
+    PointOfSale activatePointOfSale(Long id);
+
     PointOfSale assignResponsible(Long id, String responsible);
 
     List<PointOfSale> listAllPointsOfSale();

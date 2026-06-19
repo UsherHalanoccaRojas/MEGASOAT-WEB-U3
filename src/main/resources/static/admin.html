@@ -640,18 +640,23 @@
                 const data = await res.json();
                 const tbody = document.getElementById('posBody');
                 if (!data.length) { tbody.innerHTML = '<tr><td colspan="7" class="alert-empty">Sin puntos de venta</td></tr>'; return; }
-                tbody.innerHTML = data.map(p => `
+                tbody.innerHTML = data.map(p => {
+                    const isActive = p.active || p.activo;
+                    const btnClass = isActive ? 'btn-danger' : 'primary-button';
+                    const btnText = isActive ? 'Desactivar' : 'Activar';
+                    return `
                     <tr>
                         <td><code style="color:var(--accent)">${p.codigo||'—'}</code></td>
                         <td><strong>${p.name}</strong></td>
                         <td>${p.city}</td>
                         <td>${p.responsible||'—'}</td>
                         <td>${p.email||'—'}</td>
-                        <td><span class="badge ${p.active||p.activo?'low':'high'}">${p.active||p.activo?'Activo':'Inactivo'}</span></td>
+                        <td><span class="badge ${isActive?'low':'high'}">${isActive?'Activo':'Inactivo'}</span></td>
                         <td>
-                            <button class="btn-danger btn-sm" onclick="deactivatePOS(${p.id})">Desactivar</button>
+                            <button class="${btnClass} btn-sm" onclick="togglePOSActive(${p.id}, ${isActive})">${btnText}</button>
                         </td>
-                    </tr>`).join('');
+                    </tr>`;
+                }).join('');
             } catch(e) {
                 document.getElementById('posBody').innerHTML = '<tr><td colspan="7" class="alert-empty">Error al cargar</td></tr>';
             }
@@ -674,11 +679,13 @@
             } catch(e) { showToast('Error de red','error'); }
         }
 
-        async function deactivatePOS(id) {
-            if (!confirm('¿Desactivar este punto de venta?')) return;
+        async function togglePOSActive(id, currentlyActive) {
+            const action = currentlyActive ? 'desactivar' : 'activar';
+            if (!confirm(`¿${action.charAt(0).toUpperCase() + action.slice(1)} este punto de venta?`)) return;
             try {
-                const res = await fetch(`/api/points-of-sale/${id}/deactivate`, { method:'POST', headers: H() });
-                if (res.ok) { loadPOS(); showToast('Punto de venta desactivado'); }
+                const endpoint = currentlyActive ? `/api/points-of-sale/${id}/deactivate` : `/api/points-of-sale/${id}/activate`;
+                const res = await fetch(endpoint, { method:'POST', headers: H() });
+                if (res.ok) { loadPOS(); showToast(`Punto de venta ${action}do`); }
                 else showToast('Error','error');
             } catch(e) { showToast('Error de red','error'); }
         }

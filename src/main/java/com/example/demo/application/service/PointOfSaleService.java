@@ -33,6 +33,14 @@ public class PointOfSaleService implements PointOfSalePort {
     }
 
     @Override
+    public PointOfSale activatePointOfSale(Long id) {
+        PointOfSale pos = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Punto de venta no encontrado: " + id));
+        pos.setActive(true);
+        return repository.save(pos);
+    }
+
+    @Override
     public PointOfSale assignResponsible(Long id, String responsible) {
         PointOfSale pos = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Punto de venta no encontrado: " + id));
