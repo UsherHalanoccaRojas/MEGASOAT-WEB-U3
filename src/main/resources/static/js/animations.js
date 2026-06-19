@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       '/index.html': 'Inicio',
       '/ranking.html': 'Ranking',
       '/observatorio.html': 'Observatorio',
-      '/dashboard.html': 'Panel de control',
+
       '/admin.html': 'Administracion',
       '/perfil.html': 'Perfil',
       '/login': 'Login',
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { href: '/', label: '🏠 Inicio' },
       { href: '/ranking.html', label: '🏆 Ranking' },
       { href: '/observatorio.html', label: '🗺️ Observatorio' },
-      { href: '/dashboard.html', label: '📊 Panel de control', auth: true },
+
       { href: '/admin.html', label: '⚙️ Administración', auth: true },
       { href: '/perfil.html', label: '👤 Mi Perfil', auth: true },
     ];
