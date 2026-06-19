@@ -84,6 +84,10 @@
     </div>
     <script src="/js/animations.js" defer></script>
     <script>
+        if (localStorage.getItem('megaSoatToken')) {
+            window.location.replace('/observatorio.html');
+        }
+
         const button = document.getElementById('loginButton');
         const captchaCode = document.getElementById('captchaCode');
         const refreshBtn = document.getElementById('refreshCaptcha');
