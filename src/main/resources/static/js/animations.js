@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="user-chip-name">${username}</span>
           ${rolLabel ? `<span class="user-chip-role">${rolLabel}</span>` : ''}
         </div>
-        <a href="/perfil.html" class="btn-profile" title="Mi perfil">⚙</a>
+        <a href="/perfil.html" class="btn-profile" title="Mi perfil">Configuración</a>
         <button class="btn-logout" onclick="logout()">Salir</button>`;
 
       // Cargar avatar desde API si existe
@@ -296,12 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Todos los posibles links de navegación
     const allLinks = [
-      { href: '/', label: '🏠 Inicio' },
-      { href: '/ranking.html', label: '🏆 Ranking' },
-      { href: '/observatorio.html', label: '🗺️ Observatorio' },
+      { href: '/', label: 'Inicio' },
+      { href: '/ranking.html', label: 'Ranking' },
+      { href: '/observatorio.html', label: 'Observatorio' },
 
-      { href: '/admin.html', label: '⚙️ Administración', auth: true },
-      { href: '/perfil.html', label: '👤 Mi Perfil', auth: true },
+      { href: '/admin.html', label: 'Administración', auth: true },
+      { href: '/perfil.html', label: 'Mi Perfil', auth: true },
     ];
 
     allLinks.forEach(item => {

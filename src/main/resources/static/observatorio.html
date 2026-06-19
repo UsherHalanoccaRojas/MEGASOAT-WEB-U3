@@ -13,14 +13,12 @@
     <style>
         #map {
             height: 500px;
-            width: 100%;
-            border-radius: 0 0 var(--radius) var(--radius);
+            width:100%;border-radius:0 0 var(--radius) var(--radius);
         }
 
         /* Popup glassmorphism */
         .leaflet-popup-content-wrapper {
             background: rgba(12, 18, 40, 0.94);
-            backdrop-filter: blur(18px);
             color: #e6eef1;
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 14px;
@@ -53,7 +51,6 @@
             background: rgba(12, 18, 40, 0.9) !important;
             color: #e2e8f0 !important;
             border-color: rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(8px);
             
         }
 
@@ -71,7 +68,6 @@
         /* Leyenda flotante */
         .map-legend {
             background: rgba(12, 18, 40, 0.90);
-            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 10px 14px;
@@ -243,7 +239,6 @@
                         </span>
                     </div>
                 </div>
-                <button class="btn-secondary" onclick="loadMap()">↻ Actualizar mapa</button>
             </div>
         </div>
 
