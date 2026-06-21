@@ -94,10 +94,10 @@
         <div class="brand">Mega<span>SOAT</span></div>
         <div class="nav-sep"></div>
         <nav class="nav-links">
-            <a href="http://localhost:8080/">Inicio</a>
-            <a href="http://localhost:8080/dashboard.html">Dashboard</a>
-            <a href="http://localhost:8080/ranking.html">Ranking</a>
-            <a href="http://localhost:8080/observatorio.html">Observatorio</a>
+            <a href="/">Inicio</a>
+            <a href="/dashboard.html">Dashboard</a>
+            <a href="/ranking.html">Ranking</a>
+            <a href="/observatorio.html">Observatorio</a>
             <a href="/estadisticas.html" class="active">Estadísticas</a>
         </nav>
         <div class="nav-right">
@@ -155,7 +155,7 @@
 
     <script>
         const token = localStorage.getItem('megaSoatToken');
-        if (!token) { window.location.href = 'http://localhost:8080/login'; }
+        if (!token) { window.location.href = '/login'; }
 
         document.getElementById('lastUpdate').textContent = new Date().toLocaleString('es-PE');
 
@@ -166,7 +166,8 @@
 
         function logout() {
             localStorage.removeItem('megaSoatToken');
-            window.location.href = 'http://localhost:8080/login';
+            localStorage.removeItem('megaSoatUser');
+            window.location.href = '/login';
         }
 
         const headers = { 'Authorization': 'Bearer ' + token };
