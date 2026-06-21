@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas — MegaSOAT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: rgba(255,255,255,0.07);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --accent: #06b6d4;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        /* Topbar */
+        .topbar {
+            display: flex; align-items: center; gap: 16px;
+            padding: 0 28px; height: 58px;
+            background: rgba(15,23,42,0.95);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .brand { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+        .brand span { color: var(--accent); }
+        .nav-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a {
+            color: var(--muted); text-decoration: none; font-size: .875rem;
+            padding: 6px 12px; border-radius: 6px; transition: background .15s, color .15s;
+        }
+        .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.06); color: var(--text); }
+        .nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+        .user-chip {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; padding: 6px 12px; font-size: .85rem;
+        }
+        .btn-logout {
+            background: none; border: none; color: var(--muted);
+            cursor: pointer; font-size: .8rem; padding-left: 10px;
+            border-left: 1px solid var(--border);
+        }
+        .btn-logout:hover { color: var(--text); }
+
+        /* Layout */
+        .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+        .page-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+        .page-sub { color: var(--muted); font-size: .9rem; margin-bottom: 28px; }
+
+        /* Cards resumen */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px; margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 20px;
+        }
+        .stat-card h3 { font-size: .8rem; color: var(--muted); font-weight: 500; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .04em; }
+        .stat-card .value { font-size: 2rem; font-weight: 800; color: var(--text); }
+        .stat-card.accent-border { border-left: 3px solid var(--accent); }
+        .stat-card.green-border { border-left: 3px solid #22c55e; }
+        .stat-card.red-border { border-left: 3px solid #f87171; }
+        .stat-card.purple-border { border-left: 3px solid #a78bfa; }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px; margin-bottom: 28px;
+        }
+        @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 20px;
+        }
+        .chart-card h3 { font-size: .95rem; font-weight: 600; margin-bottom: 16px; }
+        .chart-wrap { height: 220px; position: relative; }
+
+        /* Loading */
+        .loading { color: var(--muted); font-size: .85rem; padding: 12px 0; }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">Mega<span>SOAT</span></div>
+        <div class="nav-sep"></div>
+        <nav class="nav-links">
+            <a href="http://localhost:8080/">Inicio</a>
+            <a href="http://localhost:8080/dashboard.html">Dashboard</a>
+            <a href="http://localhost:8080/ranking.html">Ranking</a>
+            <a href="http://localhost:8080/observatorio.html">Observatorio</a>
+            <a href="/estadisticas.html" class="active">Estadísticas</a>
+        </nav>
+        <div class="nav-right">
+            <div class="user-chip">
+                <strong id="userLabel">—</strong>
+                <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title">Estadísticas</h1>
+        <p class="page-sub">Resumen de puntos de venta y usuarios · <span id="lastUpdate">—</span></p>
+
+        <!-- Tarjetas resumen -->
+        <div class="stats-grid">
+            <div class="stat-card accent-border">
+                <h3>Total Puntos de Venta</h3>
+                <div class="value" id="totalPV">—</div>
+            </div>
+            <div class="stat-card green-border">
+                <h3>PV Activos</h3>
+                <div class="value" id="pvActivos">—</div>
+            </div>
+            <div class="stat-card red-border">
+                <h3>PV Inactivos</h3>
+                <div class="value" id="pvInactivos">—</div>
+            </div>
+            <div class="stat-card purple-border">
+                <h3>Total Usuarios</h3>
+                <div class="value" id="totalUsuarios">—</div>
+            </div>
+            <div class="stat-card green-border">
+                <h3>Usuarios Activos</h3>
+                <div class="value" id="usuariosActivos">—</div>
+            </div>
+        </div>
+
+        <!-- Gráficas -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Puntos de Venta por Ciudad</h3>
+                <div class="chart-wrap"><canvas id="chartCiudad"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3>Usuarios por Rol</h3>
+                <div class="chart-wrap"><canvas id="chartRol"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h3>PV Activos vs Inactivos</h3>
+                <div class="chart-wrap"><canvas id="chartActivos"></canvas></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('megaSoatToken');
+        if (!token) { window.location.href = 'http://localhost:8080/login'; }
+
+        document.getElementById('lastUpdate').textContent = new Date().toLocaleString('es-PE');
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('userLabel').textContent = payload.sub || '—';
+        } catch(e) {}
+
+        function logout() {
+            localStorage.removeItem('megaSoatToken');
+            window.location.href = 'http://localhost:8080/login';
+        }
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+        const COLORS = ['#06b6d4','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#0ea5e9','#f97316','#14b8a6','#ec4899','#84cc16'];
+
+        async function loadResumen() {
+            try {
+                const res = await fetch('/api/estadisticas/resumen', { headers });
+                const d = await res.json();
+                document.getElementById('totalPV').textContent = d.totalPuntosVenta ?? '—';
+                document.getElementById('pvActivos').textContent = d.puntosVentaActivos ?? '—';
+                document.getElementById('pvInactivos').textContent = d.puntosVentaInactivos ?? '—';
+                document.getElementById('totalUsuarios').textContent = d.totalUsuarios ?? '—';
+                document.getElementById('usuariosActivos').textContent = d.usuariosActivos ?? '—';
+            } catch(e) { console.error('resumen', e); }
+        }
+
+        async function loadCharts() {
+            try {
+                const [ciudadRes, rolRes, activosRes] = await Promise.all([
+                    fetch('/api/estadisticas/pv-por-ciudad', { headers }),
+                    fetch('/api/estadisticas/usuarios-por-rol', { headers }),
+                    fetch('/api/estadisticas/pv-activos-vs-inactivos', { headers })
+                ]);
+                const ciudad = await ciudadRes.json();
+                const rol = await rolRes.json();
+                const activos = await activosRes.json();
+
+                new Chart(document.getElementById('chartCiudad'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(ciudad),
+                        datasets: [{
+                            label: 'PV',
+                            data: Object.values(ciudad),
+                            backgroundColor: 'rgba(6,182,212,0.7)',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } },
+                            y: { ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.04)' } }
+                        },
+                        responsive: true, maintainAspectRatio: false
+                    }
+                });
+
+                new Chart(document.getElementById('chartRol'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(rol),
+                        datasets: [{ data: Object.values(rol), backgroundColor: COLORS, borderWidth: 0 }]
+                    },
+                    options: {
+                        plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } },
+                        responsive: true, maintainAspectRatio: false
+                    }
+                });
+
+                new Chart(document.getElementById('chartActivos'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(activos),
+                        datasets: [{ data: Object.values(activos), backgroundColor: ['#22c55e','#f87171'], borderWidth: 0 }]
+                    },
+                    options: {
+                        plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } },
+                        responsive: true, maintainAspectRatio: false
+                    }
+                });
+
+            } catch(e) { console.error('charts', e); }
+        }
+
+        loadResumen();
+        loadCharts();
+    </script>
+</body>
+</html>
