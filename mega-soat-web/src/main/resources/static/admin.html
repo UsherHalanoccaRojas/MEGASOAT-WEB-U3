@@ -292,7 +292,6 @@
         <div id="tab-monitoring" class="tab-panel">
             <div class="section-header">
                 <h2>Monitoreo en tiempo real</h2>
-                <button class="btn-secondary btn-sm" onclick="loadMonitoring()">↻ Actualizar</button>
             </div>
             <div class="monitor-grid" id="monitoringStats"></div>
             <div class="monitor-feed" id="monitoringFeed"></div>
@@ -376,7 +375,7 @@
                 : String(rolesValue).split(',').map(role => role.trim()).filter(Boolean);
             return roles.includes('ROLE_SUPERADMIN') || roles.includes('SUPERADMIN');
         })();
-        let monitoringTimer = null;
+        let monitoringWS = null; // Conexión WebSocket activa al microservicio de monitoreo
 
         function showToast(msg, type = 'success') {
             const t = document.getElementById('toast');
@@ -422,6 +421,25 @@
                 return `Solicitud a ${httpMatch[2]}`;
             }
             return raw || 'Actividad registrada';
+        }
+
+        function formatIp(ip) {
+            if (!ip || ip === '—') return '—';
+            if (ip === '0:0:0:0:0:0:0:1' || ip === '::1') return 'Localhost (127.0.0.1)';
+            return ip;
+        }
+
+        function formatEventType(type) {
+            const t = String(type || '').toUpperCase();
+            const map = {
+                'REQUEST': 'Petición HTTP',
+                'UI_EVENT': 'Interacción UI',
+                'LOGIN': 'Inicio de sesión',
+                'LOGOUT': 'Cierre de sesión',
+                'TAB_NAVIGATION': 'Navegación',
+                'REGISTER': 'Registro'
+            };
+            return map[t] || escapeHtml(type);
         }
 
         function setMonitoringVisibility() {
@@ -478,14 +496,15 @@
             document.querySelectorAll('.tab-btn')[tabNames.indexOf(name)].classList.add('active');
 
             const loaders = { users: loadUsers, pos: loadPOS, monitoring: loadMonitoring };
-            if (monitoringTimer) {
-                clearInterval(monitoringTimer);
-                monitoringTimer = null;
-            }
-            if (name === 'monitoring' && isSuperadmin) {
-                monitoringTimer = setInterval(loadMonitoring, 4000);
-            }
             if (loaders[name]) loaders[name]();
+
+            // Al entrar al monitoreo: conectar WebSocket. Al salir: desconectar.
+            if (name === 'monitoring' && isSuperadmin) {
+                connectMonitoringWS();
+            } else if (monitoringWS) {
+                monitoringWS.disconnect();
+                monitoringWS = null;
+            }
 
             if (currentTab !== name) {
                 trackTabNavigation(name);
@@ -692,66 +711,108 @@
 
         // ── MONITOREO ──
 
+        // Carga los últimos 20 eventos al abrir la pestaña de monitoreo
         async function loadMonitoring() {
             if (!isSuperadmin) return;
-
             const feedEl = document.getElementById('monitoringFeed');
             const statsEl = document.getElementById('monitoringStats');
             try {
-                const res = await fetch('http://localhost:8081/api/admin/monitoring/activities?limit=50', { headers: H() });
+                const res = await fetch('http://localhost:8081/api/admin/monitoring/activities?limit=20', { headers: H() });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
-                const data = await res.json();
-                const activities = Array.isArray(data) ? data : [];
+                const activities = await res.json();
 
-                const uniqueUsers = new Set(activities.map(item => item.actor).filter(Boolean)).size;
-                const activeIps = new Set(activities.map(item => item.ip).filter(Boolean)).size;
-                const lastEvent = activities[0];
+                renderStats(statsEl, activities);
 
-                statsEl.innerHTML = `
-                    <div class="monitor-card"><small>Eventos recientes</small><strong>${activities.length}</strong></div>
-                    <div class="monitor-card"><small>Usuarios observados</small><strong>${uniqueUsers}</strong></div>
-                    <div class="monitor-card"><small>IPs activas</small><strong>${activeIps}</strong></div>
-                    <div class="monitor-card"><small>Último evento</small><strong>${lastEvent ? escapeHtml(lastEvent.type) : '—'}</strong></div>
-                `;
-
-                if (!activities.length) {
-                    feedEl.innerHTML = '<div class="alert-empty">Aún no hay actividad para mostrar.</div>';
-                    return;
-                }
-
-                feedEl.innerHTML = activities.map(activity => {
-                    const type = escapeHtml(activity.type || 'REQUEST');
-                    const actor = escapeHtml(activity.actor || '—');
-                    const roles = escapeHtml(getActivityRoles(activity));
-                    const ip = escapeHtml(activity.ip || '—');
-                    const details = escapeHtml(formatActivityDetails(activity));
-                    const status = Number(activity.status || 0);
-                    const statusClass = status >= 400 ? 'high' : 'low';
-
-                    return `
-                        <article class="monitor-item">
-                            <div class="monitor-dot"></div>
-                            <div class="monitor-main">
-                                <strong>${actor}</strong>
-                                <p>${details}</p>
-                                <div class="monitor-meta">
-                                    <span class="monitor-pill">${roles}</span>
-                                    <span class="monitor-pill">IP ${ip}</span>
-                                    <span class="monitor-pill">${status} ${escapeHtml(activity.durationMs != null ? activity.durationMs + 'ms' : '')}</span>
-                                </div>
-                            </div>
-                            <div class="monitor-side">
-                                <div class="monitor-time">${formatActivityTime(activity.timestamp)}</div>
-                                <span class="monitor-badge ${getActivityBadgeClass(type)}">${type}</span>
-                                <div style="margin-top:8px"><span class="badge ${statusClass}">${status || '—'}</span></div>
-                            </div>
-                        </article>
-                    `;
-                }).join('');
+                feedEl.innerHTML = activities.length
+                    ? activities.map(buildEventCard).join('')
+                    : '<div class="alert-empty">Aún no hay actividad para mostrar.</div>';
             } catch (error) {
                 statsEl.innerHTML = '';
                 feedEl.innerHTML = '<div class="alert"><strong>Error</strong><p>No se pudo cargar el monitoreo.</p></div>';
             }
+        }
+
+        // Conecta al WebSocket del microservicio y agrega eventos nuevos en tiempo real
+        function connectMonitoringWS() {
+            if (monitoringWS) return; // Ya conectado
+            const socket = new SockJS('http://localhost:8081/ws/notifications');
+            const client = Stomp.over(socket);
+            client.debug = null; // Silencia logs de STOMP en consola
+            client.connect({}, () => {
+                // Suscripción al canal donde el microservicio publica cada nuevo evento
+                client.subscribe('/topic/admin/monitoring', (msg) => {
+                    try {
+                        const activity = JSON.parse(msg.body);
+                        const feedEl = document.getElementById('monitoringFeed');
+                        const statsEl = document.getElementById('monitoringStats');
+                        if (!feedEl) return;
+
+                        // Elimina el mensaje de "sin actividad" si existe
+                        const empty = feedEl.querySelector('.alert-empty');
+                        if (empty) empty.remove();
+
+                        // Agrega el nuevo evento al tope de la lista
+                        feedEl.insertAdjacentHTML('afterbegin', buildEventCard(activity));
+
+                        // Actualiza los contadores de estadísticas
+                        const cards = feedEl.querySelectorAll('.monitor-item');
+                        const actors = new Set([...cards].map(c => c.dataset.actor).filter(Boolean));
+                        const ips    = new Set([...cards].map(c => c.dataset.ip).filter(Boolean));
+                        renderStats(statsEl, [...cards].map(c => ({
+                            actor: c.dataset.actor, ip: c.dataset.ip, type: c.dataset.type
+                        })));
+                    } catch (e) { /* JSON inválido, ignorar */ }
+                });
+            }, () => {
+                // Si falla la conexión WebSocket, cae en polling básico cada 10s
+                monitoringWS = null;
+                setTimeout(() => { if (document.getElementById('tab-monitoring')?.classList.contains('active')) connectMonitoringWS(); }, 10000);
+            });
+            monitoringWS = client;
+        }
+
+        // Genera el HTML de una tarjeta de evento
+        function buildEventCard(activity) {
+            const rawType = activity.type || 'REQUEST';
+            const type    = formatEventType(rawType);
+            const actor   = escapeHtml(activity.actor || '—');
+            const roles   = escapeHtml(getActivityRoles(activity));
+            const ip      = formatIp(activity.ip || '—');
+            const details = escapeHtml(formatActivityDetails(activity));
+            const status  = Number(activity.status || 0);
+            const statusClass = status >= 400 ? 'high' : 'low';
+            return `
+                <article class="monitor-item" data-actor="${actor}" data-ip="${activity.ip}" data-type="${rawType}">
+                    <div class="monitor-dot"></div>
+                    <div class="monitor-main">
+                        <strong>${actor}</strong>
+                        <p>${details}</p>
+                        <div class="monitor-meta">
+                            <span class="monitor-pill">${roles}</span>
+                            <span class="monitor-pill">IP: ${escapeHtml(ip)}</span>
+                            <span class="monitor-pill">${status} ${escapeHtml(activity.durationMs != null ? activity.durationMs + 'ms' : '')}</span>
+                        </div>
+                    </div>
+                    <div class="monitor-side">
+                        <div class="monitor-time">${formatActivityTime(activity.timestamp)}</div>
+                        <span class="monitor-badge ${getActivityBadgeClass(rawType)}">${type}</span>
+                        <div style="margin-top:8px"><span class="badge ${statusClass}">${status || '—'}</span></div>
+                    </div>
+                </article>`;
+        }
+
+        // Actualiza las 4 tarjetas de estadísticas
+        function renderStats(statsEl, activities) {
+            const uniqueUsers = new Set(activities.map(a => a.actor).filter(Boolean)).size;
+            const activeIps   = new Set(activities.map(a => a.ip).filter(Boolean)).size;
+            const lastEvent   = activities[0];
+            const lastEventType = lastEvent ? formatEventType(lastEvent.type) : '—';
+            statsEl.innerHTML = `
+                <div class="monitor-card"><small>Eventos recientes</small><strong>${activities.length}</strong></div>
+                <div class="monitor-card"><small>Usuarios observados</small><strong>${uniqueUsers}</strong></div>
+                <div class="monitor-card"><small>IPs activas</small><strong>${activeIps}</strong></div>
+                <div class="monitor-card"><small>Último evento</small><strong>${lastEventType}</strong></div>
+            `;
         }
 
         // Load first tab
