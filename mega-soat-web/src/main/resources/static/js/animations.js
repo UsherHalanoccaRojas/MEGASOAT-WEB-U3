@@ -73,9 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Mostrar/ocultar items según auth
+    // Mostrar/ocultar items según auth (sin interferir con auth-guard para admin.html)
     document.querySelectorAll('.nav-auth').forEach(el => {
-      el.style.display = token ? (el.tagName === 'A' ? 'inline-flex' : 'flex') : 'none';
+      if (el.getAttribute('href') !== '/admin.html') {
+        el.style.display = token ? (el.tagName === 'A' ? 'inline-flex' : 'flex') : 'none';
+      }
     });
     document.querySelectorAll('.nav-guest').forEach(el => {
       el.style.display = token ? 'none' : '';
@@ -91,23 +93,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Detectar rol del token JWT (payload base64)
       let rolLabel = '';
+      let isSuperadmin = false;
+      let isAdmin = false;
       try {
         const tok = localStorage.getItem('megaSoatToken');
         if (tok) {
-          const payload = JSON.parse(atob(tok.split('.')[1]));
-          const roles = (payload.roles || '').replace('ROLE_', '').split(',');
-          rolLabel = roles[0] || '';
+          const payload = JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+          
+          const rawRoles = payload.roles || '';
+          const roleArray = Array.isArray(rawRoles) ? rawRoles : String(rawRoles).split(',').map(r => r.trim()).filter(Boolean);
+          
+          rolLabel = (roleArray[0] || '').replace('ROLE_', '');
+          
+          isSuperadmin = roleArray.includes('ROLE_SUPERADMIN') || roleArray.includes('SUPERADMIN');
+          isAdmin = roleArray.includes('ROLE_ADMIN') || roleArray.includes('ADMIN');
         }
       } catch (e) { }
 
       chip.innerHTML = `
-        <a class="user-chip-avatar" id="chipAvatar" href="/perfil.html" title="Mi perfil">${initials}</a>
+        <a class="user-chip-avatar" id="chipAvatar" href="/perfil.html" title="Configuración de perfil">${initials}</a>
         <div class="user-chip-info">
           <span class="user-chip-name">${username}</span>
           ${rolLabel ? `<span class="user-chip-role">${rolLabel}</span>` : ''}
         </div>
-        <a href="/perfil.html" class="btn-profile" title="Mi perfil">Configuración</a>
-        <button class="btn-logout" onclick="logout()">Salir</button>`;
+        <button class="btn-logout" type="button" onclick="window.logout()">Salir</button>`;
 
       // Cargar avatar desde API si existe
       if (token) {
@@ -306,6 +315,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     allLinks.forEach(item => {
       if (item.auth && !token) return;
+      
+      // Control de acceso para menú móvil
+      if (item.href === '/admin.html' && !isSuperadmin) return;
+      if (item.href === '/observatorio.html' && !isSuperadmin && !isAdmin) return;
+
       const a = document.createElement('a');
       a.href = item.href;
       a.textContent = item.label;
@@ -368,9 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
   window.logout = function () {
     const token = localStorage.getItem('megaSoatToken');
     if (token) {
+      // Usar keepalive para asegurar que el request llegue aunque la página cambie
       fetch('/api/auth/logout', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
+        headers: { 'Authorization': 'Bearer ' + token },
+        keepalive: true
       }).catch(() => {});
     }
     localStorage.removeItem('megaSoatToken');

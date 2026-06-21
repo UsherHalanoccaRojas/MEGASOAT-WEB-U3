@@ -84,8 +84,25 @@
     </div>
     <script src="/js/animations.js" defer></script>
     <script>
-        if (localStorage.getItem('megaSoatToken')) {
-            window.location.replace('/observatorio.html');
+        function decodeRoles(token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                const rolesVal = payload.roles || '';
+                return Array.isArray(rolesVal) ? rolesVal : String(rolesVal).split(',').map(r => r.trim()).filter(Boolean);
+            } catch(e) { return []; }
+        }
+
+        function getLandingPage(token) {
+            const roles = decodeRoles(token);
+            if (roles.includes('ROLE_SUPERADMIN') || roles.includes('SUPERADMIN') || roles.includes('ROLE_ADMIN') || roles.includes('ADMIN')) {
+                return '/observatorio.html';
+            }
+            return '/ranking.html'; // COMERCIAL
+        }
+
+        const currentToken = localStorage.getItem('megaSoatToken');
+        if (currentToken) {
+            window.location.replace(getLandingPage(currentToken));
         }
 
         const button = document.getElementById('loginButton');
@@ -112,7 +129,7 @@
             localStorage.setItem('megaSoatToken', body.token);
             localStorage.setItem('megaSoatUser', body.email);
             showMsg('✓ Acceso concedido', 'success');
-            setTimeout(() => { window.location.href = '/observatorio.html'; }, 500);
+            setTimeout(() => { window.location.href = getLandingPage(body.token); }, 500);
         }
 
         button.addEventListener('click', async () => {
