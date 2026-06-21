@@ -24,5 +24,6 @@
 	<modules>
 		<module>mega-soat-web</module>
 		<module>mega-soat-monitoring</module>
+		<module>mega-soat-estadisticas</module>
 	</modules>
 </project>
