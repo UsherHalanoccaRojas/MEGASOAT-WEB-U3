@@ -11,10 +11,18 @@
         return;
     }
 
-    // Extraer roles del JWT
+    // Extraer roles del JWT y verificar expiración
     let roles = [];
     try {
         const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+        if (payload.exp && Date.now() / 1000 > payload.exp) {
+            localStorage.removeItem('megaSoatToken');
+            localStorage.removeItem('megaSoatUser');
+            window.location.replace('/login');
+            return;
+        }
+
         const rolesVal = payload.roles || '';
         roles = Array.isArray(rolesVal) ? rolesVal : String(rolesVal).split(',').map(r => r.trim()).filter(Boolean);
     } catch(e) {
